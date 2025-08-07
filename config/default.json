@@ -1,4 +1,8 @@
 {
   "jwtPrivateKey": "",
-  "db": "mongodb://localhost:27017/projectTFM"
+  "db": "mongodb://localhost:27017/projectTFM",
+  "email": {
+    "user": "malla.varshini03@gmail.com",
+    "pass": "lqnndavmineqcvdq"
+  }
 }

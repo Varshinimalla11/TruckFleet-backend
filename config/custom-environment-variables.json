@@ -1,3 +1,7 @@
 {
-  "jwtPrivateKey": "TFM_jwtPrivateKey"
+  "jwtPrivateKey": "TFM_jwtPrivateKey",
+  "email": {
+    "user": "EMAIL_USER",
+    "pass": "EMAIL_PASS"
+  }
 }

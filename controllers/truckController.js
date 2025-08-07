@@ -3,7 +3,6 @@ const { validateTruck } = require("../validationModels/validateTruck");
 
 // POST /api/trucks
 exports.createTruck = async (req, res) => {
-  req.body.owner_id = req.user._id;
   const { error } = validateTruck(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 

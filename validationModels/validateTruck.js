@@ -18,10 +18,10 @@ function validateTruck(truck) {
     mileage_factor: Joi.number().required().messages({
       "any.required": "Mileage factor is required",
     }),
-    owner_id: objectId.required().messages({
-      "any.required": "Owner ID is required",
-      "any.invalid": "Owner ID must be a valid ObjectId",
-    }),
+    // owner_id: objectId.required().messages({
+    //   "any.required": "Owner ID is required",
+    //   "any.invalid": "Owner ID must be a valid ObjectId",
+    // }),
   });
   return schema.validate(truck);
 }

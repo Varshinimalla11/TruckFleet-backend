@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "cross-env EMAIL_USER=malla.varshini03@gmail.com EMAIL_PASS=lqnndavmineqcvdq nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -11,6 +12,8 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "config": "^4.1.0",
+    "cross-env": "^10.0.0",
+    "crypto": "^1.0.1",
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "joi-objectid": "^4.0.2",
@@ -19,6 +22,10 @@
     "lodash": "^4.17.21",
     "mongodb": "^6.18.0",
     "mongoose": "^8.17.0",
+    "nodemailer": "^7.0.5",
+    "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "validator": "^13.15.15",
     "winston": "^3.17.0",
     "winston-mongodb": "^7.0.0"

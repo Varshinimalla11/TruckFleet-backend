@@ -12,7 +12,7 @@ const inviteTokenSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
-    owner_id: {
+    owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -30,9 +30,7 @@ const inviteTokenSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-inviteSchema.index({ token: 1 }, { unique: true });
-inviteSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 3600 });
 
 const InviteToken = mongoose.model("InviteToken", inviteTokenSchema);
 
-module.exports = InviteToken;
+exports.InviteToken = InviteToken;

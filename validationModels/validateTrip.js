@@ -90,8 +90,8 @@ function validateTrip(trip) {
     }),
 
     status: Joi.string()
-      .valid("ongoing", "completed", "cancelled")
-      .default("ongoing")
+      .valid("scheduled", "ongoing", "completed", "cancelled")
+      .default("scheduled")
       .messages({
         "string.base": "Status must be a string",
         "any.only":
@@ -102,4 +102,4 @@ function validateTrip(trip) {
   return schema.validate(trip);
 }
 
-module.exports = validateTrip;
+exports.validateTrip = validateTrip;

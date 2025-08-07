@@ -9,7 +9,7 @@ function validateInviteToken(data) {
       "string.email": "Invalid email format",
       "any.required": "Email is required",
     }),
-    owner_id: Joi.objectId().required().messages({
+    owner: Joi.objectId().required().messages({
       "any.required": "Owner ID is required",
       "string.pattern.name": "Invalid owner ID",
     }),
