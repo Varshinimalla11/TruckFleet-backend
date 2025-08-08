@@ -2,6 +2,7 @@ const Trip = require("../models/trip");
 const { validateTrip } = require("../validationModels/validateTrip");
 const notifyUser = require("../utils/notifyUser");
 const User = require("../models/user");
+const DriveSession = require("../models/driveSession");
 
 // POST /api/trips
 exports.createTrip = async (req, res) => {
@@ -49,7 +50,17 @@ exports.getTripById = async (req, res) => {
     isDeleted: false, // ✅ Only fetch non-deleted trips
   });
   if (!trip) return res.status(404).send("Trip not found");
-  res.send(trip);
+  const allSessions = await DriveSession.find({ trip_id: trip._id });
+  const totalKmCovered = allSessions.reduce(
+    (sum, s) => sum + Math.max(s.km_covered || 0, 0),
+    0
+  );
+  const remaining_km_in_trip = Math.max(trip.total_km - totalKmCovered, 0);
+
+  res.send({
+    ...trip.toObject(),
+    remaining_km_in_trip,
+  });
 };
 
 // PUT /api/trips/:id/start
@@ -62,17 +73,27 @@ exports.startTrip = async (req, res) => {
       .status(400)
       .send("Trip can only be started if it is in 'scheduled' status.");
   }
-
+  const now = new Date();
   trip.status = "ongoing";
-  trip.start_time = new Date();
+  trip.start_time = now;
   await trip.save();
-  await notifyUser(trip.driver_id, "🚚 Your trip has started.");
+
+  const firstSession = new DriveSession({
+    trip_id: trip._id,
+    start_time: now,
+  });
+  await firstSession.save();
+
+  await notifyUser(
+    trip.driver_id,
+    "🚚 Your trip has started. Drive session created"
+  );
   await notifyUser(
     trip.owner_id,
     `📢 Your driver has started the trip from ${trip.start_city}.`
   );
 
-  res.send({ message: "Trip started", trip });
+  res.send({ message: "Trip started", trip, firstSession });
 };
 
 // PUT /api/trips/:id/complete
@@ -86,11 +107,30 @@ exports.completeTrip = async (req, res) => {
       .send("Trip can only be completed if it is 'ongoing'.");
   }
 
+  const now = new Date();
   trip.status = "completed";
-  trip.end_time = new Date();
+  trip.end_time = now;
   await trip.save();
 
-  res.send({ message: "Trip completed", trip });
+  // 🛑 Auto-end any active drive session
+  const ongoingDrive = await DriveSession.findOne({
+    trip_id: trip._id,
+    end_time: null,
+  });
+
+  if (ongoingDrive) {
+    ongoingDrive.end_time = now;
+    ongoingDrive.duration_hours = Number(
+      ((now - ongoingDrive.start_time) / (1000 * 60 * 60)).toFixed(2)
+    );
+    await ongoingDrive.save();
+  }
+
+  res.send({
+    message: "✅ Trip completed",
+    trip,
+    driveSessionClosed: !!ongoingDrive,
+  });
 };
 
 // DELETE /api/trips/:id

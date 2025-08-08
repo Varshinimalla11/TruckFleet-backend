@@ -12,13 +12,18 @@ const DriveSessionSchema = new mongoose.Schema({
   },
   end_time: {
     type: Date,
-    required: true,
   },
   fuel_used: {
     type: Number,
   },
   km_covered: {
     type: Number,
+  },
+  warned_at_3hr: {
+    type: Date,
+  },
+  warned_at_8hr: {
+    type: Date,
   },
 });
 

@@ -8,6 +8,7 @@ const app = express();
 require("./startup/config")();
 require("./startup/validation")();
 require("./startup/db")();
+require("./cron/driveMonitoringJob");
 require("./startup/routes")(app);
 
 const specs = swaggerJsdoc(swaggerOptions);
