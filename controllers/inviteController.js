@@ -38,3 +38,19 @@ exports.sendInviteToken = async (req, res) => {
     });
   }
 };
+
+exports.verifyInviteToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) return res.status(400).send({ message: "Token is required" });
+
+    const tokenDoc = await InviteToken.findOne({ token, isUsed: false });
+    if (!tokenDoc || tokenDoc.expiresAt < Date.now()) {
+      return res.status(400).send({ message: "Invalid or expired token" });
+    }
+
+    res.send({ valid: true, email: tokenDoc.email });
+  } catch (err) {
+    res.status(500).send({ message: "Server error" });
+  }
+};
