@@ -3,7 +3,10 @@ const winston = require("winston");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerOptions = require("./swagger/swaggerOptions");
+const cors = require('cors')
 const app = express();
+
+app.use(cors())
 
 require("./startup/config")();
 require("./startup/validation")();
