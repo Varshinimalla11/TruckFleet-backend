@@ -23,7 +23,9 @@ const truckSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-});
+},
+ { timestamps: true }
+);
 truckSchema.index({ owner_id: 1 });
 
 const Truck = mongoose.model("Truck", truckSchema);
