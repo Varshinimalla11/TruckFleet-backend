@@ -38,4 +38,50 @@ const inviteController = require("../controllers/inviteController");
 // POST /api/invitetokens/send
 router.post("/send", [auth, ownerOnly], inviteController.sendInviteToken);
 
+/**
+ * @swagger
+ * /api/invitetokens/verify:
+ *   post:
+ *     summary: Verify an invite token
+ *     tags: [InviteToken]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: abc123def456
+ *     responses:
+ *       200:
+ *         description: Valid invite token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                   example: true
+ *                 email:
+ *                   type: string
+ *                   example: driver@example.com
+ *       400:
+ *         description: Invalid or expired token, or token missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid or expired token
+ *       500:
+ *         description: Server error
+ */
+router.post("/verify", inviteController.verifyInviteToken);
 module.exports = router;

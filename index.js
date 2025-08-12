@@ -5,7 +5,6 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerOptions = require("./swagger/swaggerOptions");
 const cors = require('cors')
 const app = express();
-
 app.use(cors())
 
 require("./startup/config")();

@@ -97,7 +97,11 @@ router.post("/", [auth, ownerOnly], tripController.createTrip);
  *         description: List of trips
  */
 // Get all trips (Owner sees theirs, Admin sees all)
-router.get("/", auth, tripController.getAllTrips);
+router.get(
+  "/",
+  [auth, authorizeRole("owner", "admin")],
+  tripController.getAllTrips
+);
 
 /**
  * @swagger

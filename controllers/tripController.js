@@ -32,6 +32,9 @@ exports.createTrip = async (req, res) => {
 
 // GET /api/trips
 exports.getAllTrips = async (req, res) => {
+  if (req.user.role === "driver") {
+    return res.status(403).send("Drivers are not allowed to view all trips.");
+  }
   const statusFilter = req.query.status; // ?status=ongoing
   const filter = {
     isDeleted: false,
@@ -39,7 +42,9 @@ exports.getAllTrips = async (req, res) => {
     ...(statusFilter && { status: statusFilter }),
   };
 
-  const trips = await Trip.find(filter);
+  const trips = await Trip.find(filter)
+    .populate("truck_id")
+    .populate("driver_id");
   res.send(trips);
 };
 
@@ -48,7 +53,9 @@ exports.getTripById = async (req, res) => {
   const trip = await Trip.findOne({
     _id: req.params.id,
     isDeleted: false, // ✅ Only fetch non-deleted trips
-  });
+  })
+    .populate("truck_id")
+    .populate("driver_id");
   if (!trip) return res.status(404).send("Trip not found");
   const allSessions = await DriveSession.find({ trip_id: trip._id });
   const totalKmCovered = allSessions.reduce(
