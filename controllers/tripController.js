@@ -3,6 +3,7 @@ const { validateTrip } = require("../validationModels/validateTrip");
 const notifyUser = require("../utils/notifyUser");
 const User = require("../models/user");
 const DriveSession = require("../models/driveSession");
+const RestLog = require("../models/restLog");
 
 // POST /api/trips
 exports.createTrip = async (req, res) => {
@@ -103,41 +104,109 @@ exports.startTrip = async (req, res) => {
   res.send({ message: "Trip started", trip, firstSession });
 };
 
-// PUT /api/trips/:id/complete
+// // PUT /api/trips/:id/complete
+// exports.completeTrip = async (req, res) => {
+//   const trip = await Trip.findById(req.params.id);
+//   if (!trip) return res.status(404).send("Trip not found");
+
+//   if (trip.status !== "ongoing") {
+//     return res
+//       .status(400)
+//       .send("Trip can only be completed if it is 'ongoing'.");
+//   }
+
+//   if (typeof req.body.fuel_end !== "number") {
+//     return res
+//       .status(400)
+//       .send("Fuel at end is required and must be a number.");
+//   }
+
+//   const now = new Date();
+//   trip.status = "completed";
+//   trip.end_time = now;
+//   trip.fuel_end = req.body.fuel_end;
+//   await trip.save();
+
+//   let driveSessionClosed = false;
+//   let restLogClosed = false;
+
+//   // 🛑 Auto-end any active drive session
+//   const ongoingDrive = await DriveSession.findOne({
+//     trip_id: trip._id,
+//     end_time: null,
+//   });
+
+//   if (ongoingDrive) {
+//     ongoingDrive.end_time = now;
+//     ongoingDrive.duration_hours = Number(
+//       ((now - ongoingDrive.start_time) / (1000 * 60 * 60)).toFixed(2)
+//     );
+//     await ongoingDrive.save();
+//     driveSessionClosed = true;
+//   }
+
+//   if (!ongoingDrive) {
+//     const ongoingRest = await RestLog.findOne({
+//       trip_id: trip._id,
+//       rest_end_time: null,
+//     });
+//     if (ongoingRest) {
+//       ongoingRest.rest_end_time = now;
+//       ongoingRest.duration_hours = Number(
+//         ((now - ongoingRest.rest_start_time) / (1000 * 60 * 60)).toFixed(2)
+//       );
+//       await ongoingRest.save();
+//       restLogClosed = true;
+//     }
+//   }
+
+//   res.send({
+//     message: "✅ Trip completed",
+//     trip,
+//     driveSessionClosed,
+//     restLogClosed,
+//   });
+// };
 exports.completeTrip = async (req, res) => {
-  const trip = await Trip.findById(req.params.id);
-  if (!trip) return res.status(404).send("Trip not found");
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).send("Trip not found");
 
-  if (trip.status !== "ongoing") {
-    return res
-      .status(400)
-      .send("Trip can only be completed if it is 'ongoing'.");
+    // Find latest activity for the trip
+    const lastDrive = await DriveSession.findOne({ trip_id: trip._id }).sort({
+      end_time: -1,
+    });
+    const lastRest = await RestLog.findOne({ trip_id: trip._id }).sort({
+      rest_end_time: -1,
+    });
+
+    // Determine which is latest
+    let fuel_end = null;
+    if (
+      lastDrive &&
+      (!lastRest || lastDrive.end_time > lastRest.rest_end_time)
+    ) {
+      fuel_end = lastDrive.fuel_left; // renamed from fuel_left for clarity
+    } else if (lastRest) {
+      fuel_end = lastRest.fuel_at_rest_end ?? lastRest.fuel_at_rest_start;
+    }
+
+    if (fuel_end == null) {
+      return res
+        .status(400)
+        .send("Cannot complete trip: No final fuel reading found.");
+    }
+
+    trip.fuel_end = fuel_end;
+    trip.status = "completed";
+    trip.completed_at = new Date();
+    await trip.save();
+
+    res.send({ message: "Trip completed successfully", trip });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
   }
-
-  const now = new Date();
-  trip.status = "completed";
-  trip.end_time = now;
-  await trip.save();
-
-  // 🛑 Auto-end any active drive session
-  const ongoingDrive = await DriveSession.findOne({
-    trip_id: trip._id,
-    end_time: null,
-  });
-
-  if (ongoingDrive) {
-    ongoingDrive.end_time = now;
-    ongoingDrive.duration_hours = Number(
-      ((now - ongoingDrive.start_time) / (1000 * 60 * 60)).toFixed(2)
-    );
-    await ongoingDrive.save();
-  }
-
-  res.send({
-    message: "✅ Trip completed",
-    trip,
-    driveSessionClosed: !!ongoingDrive,
-  });
 };
 
 // DELETE /api/trips/:id

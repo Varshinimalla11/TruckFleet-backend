@@ -80,6 +80,11 @@ function validateTrip(trip) {
       "any.required": "Fuel at start is required",
     }),
 
+    fuel_end: Joi.number().min(0).optional().messages({
+      "number.base": "Fuel at end must be a number",
+      "number.min": "Fuel at end cannot be negative",
+    }),
+
     start_time: Joi.date().required().messages({
       "date.base": "Start time must be a valid date",
       "any.required": "Start time is required",

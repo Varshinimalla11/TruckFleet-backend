@@ -4,7 +4,7 @@ const Trip = require("../models/trip");
 const { Notification } = require("../models/notification");
 const { Truck } = require("../models/truck");
 // const { validateDriveSession } = require("../validations/driveSessionValidation"); // Uncomment if using Joi validation
-
+const RefuelEvent = require("../models/refuelEvent");
 // Utility
 function getHoursBetween(start, end) {
   return (new Date(end) - new Date(start)) / (1000 * 60 * 60);
@@ -92,7 +92,7 @@ exports.createDriveSession = async (req, res) => {
 };
 
 //
-// 2️⃣ End drive session and start rest
+// End drive session and start rest
 //
 exports.endDriveSessionAndStartRest = async (req, res) => {
   const { session_id } = req.params;
@@ -111,19 +111,58 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
   const trip = await Trip.findById(session.trip_id);
   const truck = await Truck.findById(trip.truck_id);
   const mileage = truck.mileage_factor || 3;
-  let km_covered = fuel_used * mileage;
-  if (km_covered < 0) km_covered = 0;
-  const lastRest = await RestLog.findOne({
+
+  let start_fuel = trip.fuel_start ?? 100;
+
+  const lastRestLog = await RestLog.findOne({
     trip_id: trip._id,
-    rest_end_time: { $exists: true },
+    rest_end_time: { $lte: session.start_time },
   }).sort({ rest_end_time: -1 });
 
-  const start_fuel = lastRest?.fuel_filled ?? trip.initial_fuel_start ?? 100;
+  if (lastRestLog && typeof lastRestLog.fuel_at_rest_end === "number") {
+    start_fuel = lastRestLog.fuel_at_rest_end; // ✅ Take fuel after rest ends
+  }
+
+  const lastDrive = await DriveSession.findOne({
+    trip_id: trip._id,
+    end_time: { $lte: session.start_time },
+  }).sort({ end_time: -1 });
+
+  if (lastDrive && typeof lastDrive.fuel_left === "number") {
+    start_fuel = lastDrive.fuel_left;
+  }
+
+  const refuelsDuringDrive = await RefuelEvent.find({
+    trip_id: trip._id,
+    event_time: { $gte: session.start_time, $lte: now },
+  });
+
+  const fuelAddedTotal = refuelsDuringDrive.reduce(
+    (sum, r) => sum + (r.fuel_added || 0),
+    0
+  );
+
+  start_fuel += fuelAddedTotal;
+
   let fuel_used = start_fuel - fuel_left;
   if (fuel_used < 0) fuel_used = 0;
 
+  let km_covered = fuel_used * mileage;
+  if (km_covered < 0) km_covered = 0;
+
+  const totalKmBefore = await DriveSession.aggregate([
+    { $match: { trip_id: trip._id, _id: { $ne: session._id } } },
+    { $group: { _id: null, total: { $sum: "$km_covered" } } },
+  ]);
+  const kmAlready = totalKmBefore.length ? totalKmBefore[0].total : 0;
+
+  if (kmAlready + km_covered > trip.total_km) {
+    km_covered = Math.max(trip.total_km - kmAlready, 0);
+  }
+
   session.fuel_used = Number(fuel_used.toFixed(2));
-  session.km_covered = Number((fuel_used * mileage).toFixed(2));
+  session.km_covered = Number(km_covered.toFixed(2));
+  session.fuel_left = fuel_left;
   await session.save();
 
   const rest = new RestLog({
@@ -134,13 +173,6 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
 
   await rest.save();
 
-  const allSessions = await DriveSession.find({ trip_id: trip._id });
-  const totalKmCovered = allSessions.reduce(
-    (sum, s) => sum + (s.km_covered || 0),
-    0
-  );
-  const remaining_km_in_trip = Math.max(trip.total_km - totalKmCovered, 0);
-
   await Notification.create({
     user_id: req.user._id,
     message: `🛑 Drive session ended after ${session.duration_hours} hrs. Rest started.`,
@@ -150,7 +182,7 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
     message: "Drive session ended and rest started",
     fuel_used: session.fuel_used,
     km_covered: session.km_covered,
-    remaining_km_in_trip,
+    remaining_km_in_trip: Math.max(trip.total_km - (kmAlready + km_covered), 0),
     session,
     restLog: rest,
   });

@@ -3,5 +3,8 @@
   "email": {
     "user": "EMAIL_USER",
     "pass": "EMAIL_PASS"
+  },
+  "socket": {
+    "corsOrigin": "FRONTEND_URL"
   }
 }

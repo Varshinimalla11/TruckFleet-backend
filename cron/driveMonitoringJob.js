@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const DriveSession = require("../models/driveSession");
 const Trip = require("../models/trip");
 const notifyUser = require("../utils/notifyUser");
+const Notification = require("../models/notification");
 
 function getHoursBetween(start, end) {
   return (new Date(end) - new Date(start)) / (1000 * 60 * 60);

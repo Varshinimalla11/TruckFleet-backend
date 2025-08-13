@@ -56,6 +56,10 @@ const tripSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    fuel_end: {
+      type: Number,
+      default: null, // Will be set when trip completes
+    },
     start_time: {
       type: Date,
       required: true,

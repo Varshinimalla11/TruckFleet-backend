@@ -26,7 +26,7 @@ const auth = require("../middleware/auth");
  *           schema:
  *             type: object
  *             properties:
- *               fuel_left:
+ *               fuel_at_rest_end:
  *                 type: number
  *                 example: 15.5
  *                 description: Remaining fuel in tank after driving

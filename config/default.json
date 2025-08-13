@@ -4,5 +4,9 @@
   "email": {
     "user": "malla.varshini03@gmail.com",
     "pass": "lqnndavmineqcvdq"
+  },
+  "socket": {
+    "corsOrigin": "http://localhost:3000",
+    "path": "/socket.io"
   }
 }

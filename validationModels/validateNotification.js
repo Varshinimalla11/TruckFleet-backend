@@ -7,10 +7,20 @@ const validateNotification = (notification) => {
       "any.required": "User ID is required.",
       "string.pattern.name": "User ID must be a valid ObjectId.",
     }),
+    title: Joi.string().trim().max(100).messages({
+      "string.base": "Title must be a string.",
+      "string.max": "Title cannot exceed 100 characters.",
+    }),
     message: Joi.string().trim().required().messages({
       "any.required": "Message is required.",
       "string.empty": "Message cannot be empty.",
     }),
+    type: Joi.string()
+      .valid("info", "warning", "error", "success")
+      .default("info")
+      .messages({
+        "any.only": "Type must be one of: info, warning, error, success.",
+      }),
     seen: Joi.boolean().messages({
       "boolean.base": "Seen must be a boolean value.",
     }),
@@ -19,7 +29,7 @@ const validateNotification = (notification) => {
     }),
   });
 
-  return schema.validate(notification);
+  return schema.validate(notification, { abortEarly: false });
 };
 
 exports.validateNotification = validateNotification;
