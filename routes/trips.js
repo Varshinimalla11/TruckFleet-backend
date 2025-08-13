@@ -178,12 +178,25 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fuel_left
+ *             properties:
+ *               fuel_left:
+ *                 type: number
+ *                 example: 45.5
  *     responses:
  *       200:
- *         description: Trip completed
+ *         description: Trip completed successfully
  *       400:
- *         description: Invalid status transition
+ *         description: Invalid status transition or missing fuel_left
  */
+
 // Complete trip
 router.put(
   "/:id/complete",

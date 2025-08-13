@@ -26,8 +26,7 @@ const validateRefuelEvent = (data) => {
       "number.min": "Fuel added must be 0 or more.",
     }),
 
-    fuel_after: Joi.number().min(0).required().messages({
-      "any.required": "Fuel after is required.",
+    fuel_after: Joi.number().min(0).messages({    
       "number.base": "Fuel after must be a number.",
       "number.min": "Fuel after must be 0 or more.",
     }),

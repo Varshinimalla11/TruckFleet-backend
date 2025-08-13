@@ -11,10 +11,11 @@ exports.logRefuel = async (req, res) => {
     event_time,
     fuel_before,
     fuel_added,
-    fuel_after,
     payment_mode,
   } = req.body;
 
+  const fuel_after = fuel_before + fuel_added;
+  
   const trip = await Trip.findById(trip_id);
   if (!trip) return res.status(404).send("Trip not found");
 

@@ -22,7 +22,6 @@ const auth = require("../middleware/auth");
  *               - event_time
  *               - fuel_before
  *               - fuel_added
- *               - fuel_after
  *             properties:
  *               trip_id:
  *                 type: string
@@ -32,8 +31,6 @@ const auth = require("../middleware/auth");
  *               fuel_before:
  *                 type: number
  *               fuel_added:
- *                 type: number
- *               fuel_after:
  *                 type: number
  *               payment_mode:
  *                 type: string

@@ -167,47 +167,69 @@ exports.startTrip = async (req, res) => {
 //     restLogClosed,
 //   });
 // };
+
+
 exports.completeTrip = async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.id);
-    if (!trip) return res.status(404).send("Trip not found");
-
-    // Find latest activity for the trip
-    const lastDrive = await DriveSession.findOne({ trip_id: trip._id }).sort({
-      end_time: -1,
-    });
-    const lastRest = await RestLog.findOne({ trip_id: trip._id }).sort({
-      rest_end_time: -1,
-    });
-
-    // Determine which is latest
-    let fuel_end = null;
-    if (
-      lastDrive &&
-      (!lastRest || lastDrive.end_time > lastRest.rest_end_time)
-    ) {
-      fuel_end = lastDrive.fuel_left; // renamed from fuel_left for clarity
-    } else if (lastRest) {
-      fuel_end = lastRest.fuel_at_rest_end ?? lastRest.fuel_at_rest_start;
+    const { fuel_left } = req.body;
+    if (fuel_left === undefined || fuel_left === null) {
+      return res.status(400).json({ message: "fuel_left is required to complete the trip" });
     }
 
-    if (fuel_end == null) {
-      return res
-        .status(400)
-        .send("Cannot complete trip: No final fuel reading found.");
+    const trip = await Trip.findById(req.params.id); // ✅ fixed param
+    if (!trip) {
+      return res.status(404).json({ message: "Trip not found" });
+    }
+    if (trip.status === "completed") {
+      return res.status(400).json({ message: "Trip is already completed" });
     }
 
-    trip.fuel_end = fuel_end;
+    const now = new Date();
+
+    // Close any open DriveSession
+    const openDrive = await DriveSession.findOne({
+      trip_id: trip._id,
+      end_time: null, // ✅ changed for consistency
+    });
+    if (openDrive) {
+      openDrive.end_time = now;
+      openDrive.fuel_end = fuel_left;
+      await openDrive.save();
+    }
+
+    // Close any open RestLog
+    const openRest = await RestLog.findOne({
+      trip_id: trip._id,
+      rest_end_time: null, // ✅ changed for consistency
+    });
+    if (openRest) {
+      openRest.rest_end_time = now;
+      openRest.fuel_at_rest_end = fuel_left;
+      await openRest.save();
+    }
+
+    // Update trip details
     trip.status = "completed";
-    trip.completed_at = new Date();
+    trip.trip_end_time = now;
+    trip.fuel_end = fuel_left;
     await trip.save();
 
-    res.send({ message: "Trip completed successfully", trip });
+    // Notify driver/owner
+    await notifyUser(req.user._id, "✅ Trip completed successfully.");
+
+    res.json({
+      message: "Trip completed successfully",
+      trip,
+      closedDriveSession: openDrive || null,
+      closedRestLog: openRest || null,
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Server error");
+    res.status(500).json({ message: error.message });
   }
 };
+
+
 
 // DELETE /api/trips/:id
 // Soft delete: mark trip as deleted instead of removing it
