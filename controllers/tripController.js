@@ -168,12 +168,13 @@ exports.startTrip = async (req, res) => {
 //   });
 // };
 
-
 exports.completeTrip = async (req, res) => {
   try {
     const { fuel_left } = req.body;
     if (fuel_left === undefined || fuel_left === null) {
-      return res.status(400).json({ message: "fuel_left is required to complete the trip" });
+      return res
+        .status(400)
+        .json({ message: "fuel_left is required to complete the trip" });
     }
 
     const trip = await Trip.findById(req.params.id); // ✅ fixed param
@@ -223,13 +224,51 @@ exports.completeTrip = async (req, res) => {
       closedDriveSession: openDrive || null,
       closedRestLog: openRest || null,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// PUT /api/trips/:id
+exports.updateTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) return res.status(404).send("Trip not found");
 
+    if (["completed", "cancelled"].includes(trip.status)) {
+      return res
+        .status(400)
+        .send("Cannot update a completed or cancelled trip.");
+    }
+
+    // Only owners or admins can update trips
+    if (req.user.role === "driver") {
+      return res.status(403).send("Drivers cannot update trips.");
+    }
+
+    // Allowed fields to update
+    const allowedUpdates = [
+      "start_city",
+      "end_city",
+      "total_km",
+      "cargo_weight",
+      "fuel_start",
+      "start_time",
+    ];
+
+    allowedUpdates.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        trip[field] = req.body[field];
+      }
+    });
+
+    await trip.save();
+
+    res.status(200).json({ message: "Trip updated successfully", trip });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // DELETE /api/trips/:id
 // Soft delete: mark trip as deleted instead of removing it

@@ -140,7 +140,7 @@ router.get("/:id", auth, tripController.getTripById);
 /**
  * @swagger
  * /api/trips/{id}/start:
- *   put:
+ *   patch:
  *     summary: Start a scheduled trip
  *     tags: [Trips]
  *     security:
@@ -158,7 +158,7 @@ router.get("/:id", auth, tripController.getTripById);
  *         description: Invalid status transition
  */
 // Start trip
-router.put(
+router.patch(
   "/:id/start",
   [auth, canStartorCompleteTrip],
   tripController.startTrip
@@ -207,6 +207,73 @@ router.put(
 /**
  * @swagger
  * /api/trips/{id}:
+ *   put:
+ *     summary: Update a trip's details
+ *     tags: [Trips]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Trip ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               start_city:
+ *                 type: string
+ *               end_city:
+ *                 type: string
+ *               total_km:
+ *                 type: number
+ *               cargo_weight:
+ *                 type: number
+ *               fuel_start:
+ *                 type: number
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *             example:
+ *               start_city: "Bangalore"
+ *               end_city: "Chennai"
+ *               total_km: 350
+ *               cargo_weight: 2000
+ *               fuel_start: 50
+ *               start_time: "2025-08-14T09:00:00Z"
+ *     responses:
+ *       200:
+ *         description: Trip updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 trip:
+ *                   $ref: '#/components/schemas/Trip'
+ *       400:
+ *         description: Cannot update completed or cancelled trip
+ *       403:
+ *         description: Drivers cannot update trips
+ *       404:
+ *         description: Trip not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put(
+  "/:id",
+  [auth, authorizeRole("admin", "owner")],
+  tripController.updateTrip
+);
+
+/**
+ * @swagger
+ * /api/trips/{id}:
  *   delete:
  *     summary: Soft delete a trip (admin/owner only)
  *     tags: [Trips]
@@ -234,7 +301,7 @@ router.delete(
 /**
  * @swagger
  * /api/trips/{id}/restore:
- *   put:
+ *   patch:
  *     summary: Restore a soft-deleted trip
  *     tags: [Trips]
  *     security:
@@ -252,7 +319,7 @@ router.delete(
  *         description: Not deleted
  */
 // Restore trip (admin or owner)
-router.put(
+router.patch(
   "/:id/restore",
   [auth, authorizeRole("admin", "owner")],
   tripController.restoreTrip
@@ -261,7 +328,7 @@ router.put(
 /**
  * @swagger
  * /api/trips/{id}/cancel:
- *   put:
+ *   patch:
  *     summary: Cancel a scheduled or ongoing trip
  *     tags: [Trips]
  *     security:
@@ -279,7 +346,7 @@ router.put(
  *         description: Invalid or already completed
  */
 // Cancel trip (admin or owner)
-router.put(
+router.patch(
   "/:id/cancel",
   [auth, authorizeRole("owner", "admin")],
   tripController.cancelTrip

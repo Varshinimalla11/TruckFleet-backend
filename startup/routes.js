@@ -8,6 +8,7 @@ const inviteTokens = require("../routes/inviteTokens");
 const driveSessions = require("../routes/driveSessions");
 const restLogs = require("../routes/restLogs");
 const refuelEvents = require("../routes/refuelEvents");
+const dashboards = require("../routes/dashboards");
 
 module.exports = function (app) {
   // Middleware to parse JSON bodies
@@ -23,6 +24,7 @@ module.exports = function (app) {
   app.use("/api/drive-sessions", driveSessions);
   app.use("/api/rest-logs", restLogs);
   app.use("/api/refuel-events", refuelEvents);
+  app.use("/api/dashboard", dashboards);
 
   // Add other routes here as needed
 };

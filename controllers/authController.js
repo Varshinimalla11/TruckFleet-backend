@@ -8,17 +8,28 @@ const _ = require("lodash");
 
 exports.register = async (req, res) => {
   const { error } = validateUser(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return res.status(400).send({ message: error.details[0].message });
 
   let user = await User.findOne({ email: req.body.email });
-  if (user) return res.status(400).send("User already registered.");
+  if (user)
+    return res.status(409).send({ message: "Email is already registered" });
 
-  const allowedFields = ["name", "email", "phone", "password", "role"];
-  if (req.body.role === "driver") {
-    allowedFields.push("aadhar_number", "license_number", "ownedBy");
+  if (req.body.phone) {
+    const existingPhone = await User.findOne({ phone: req.body.phone });
+    if (existingPhone) {
+      return res
+        .status(409)
+        .send({ message: "Phone number is already registered" });
+    }
   }
 
+  const allowedFields = ["name", "email", "phone", "password"];
+  // if (req.body.role === "driver") {
+  //   allowedFields.push("aadhar_number", "license_number", "ownedBy");
+  // }
   const filteredData = _.pick(req.body, allowedFields);
+  filteredData.role = "owner";
+
   user = new User(filteredData);
   await user.save();
 
