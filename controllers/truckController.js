@@ -19,9 +19,20 @@ exports.createTruck = async (req, res) => {
 
 // GET /api/trucks
 exports.getAllTrucks = async (req, res) => {
-  const filter = req.user.role === "owner" ? { owner_id: req.user._id } : {};
-  const trucks = await Truck.find(filter);
-  res.send(trucks);
+  // Only owner sees their own trucks; admin sees all; driver sees nothing.
+  if (req.user.role === "owner") {
+    const trucks = await Truck.find({ owner_id: req.user._id });
+    return res.send(trucks);
+  }
+  if (req.user.role === "admin") {
+    const trucks = await Truck.find({});
+    return res.send(trucks);
+  }
+  if (req.user.role === "driver") {
+    // show only the truck assigned to a trip
+    return res.status(403).json({ message: "Drivers are not permitted to view truck list." });
+  }
+  res.status(403).json({ message: "Unauthorized role" });
 };
 
 // GET /api/trucks/:id

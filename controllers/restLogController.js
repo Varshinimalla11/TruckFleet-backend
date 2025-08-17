@@ -23,14 +23,35 @@ exports.endRestAndStartDrive = async (req, res) => {
       start_time: new Date(),
     });
 
+    
+    await notifyUser(req.user._id, "🟢 Rest ended. Drive session resumed.");
+    
+    const trip = await Trip.findById(restLog.trip_id).populate("driver_id");
+    if (trip) {
+      await notifyUser(
+        trip.owner_id,
+        `📢 Driver ${trip.driver_snapshot.name} has resumed driving after a rest.`
+      );
+    }
+    
     res.json({
       message: "Rest ended and drive resumed",
       restLog,
       newDriveSession,
     });
 
-    await notifyUser(req.user._id, "🟢 Rest ended. Drive session resumed.");
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+
+// ✅ Get all rest logs for a trip
+exports.getRestLogsByTrip = async (req, res) => {
+  try {
+    const restLogs = await RestLog.find({ trip_id: req.params.tripId });
+    res.json(restLogs);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };

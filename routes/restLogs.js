@@ -3,6 +3,28 @@ const router = express.Router();
 const restLogController = require("../controllers/restLogController");
 const auth = require("../middleware/auth");
 
+// 📌 Get all rest logs by Trip ID
+/**
+ * @swagger
+ * /api/rest-logs/trip/{tripId}:
+ *   get:
+ *     summary: Get all rest logs for a specific trip
+ *     tags: [RestLogs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tripId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Trip ID
+ *     responses:
+ *       200:
+ *         description: List of rest logs
+ */
+router.get("/trip/:tripId", auth, restLogController.getRestLogsByTrip);
+
 // 📌 End rest and auto-start drive
 /**
  * @swagger

@@ -116,6 +116,28 @@ router.get(
 
 /**
  * @swagger
+ * /api/trips/my-trips:
+ *   get:
+ *     summary: Get trips assigned to the logged-in driver
+ *     tags: [Trips]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of trips assigned to the logged-in driver
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Trip'
+ *       403:
+ *         description: Only drivers can view their trips
+ */
+router.get("/my-trips", auth, tripController.getMyTrips);
+
+/**
+ * @swagger
  * /api/trips/{id}:
  *   get:
  *     summary: Get a trip by ID
@@ -351,5 +373,8 @@ router.patch(
   [auth, authorizeRole("owner", "admin")],
   tripController.cancelTrip
 );
+
+
+
 
 module.exports = router;

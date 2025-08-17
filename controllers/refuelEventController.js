@@ -37,6 +37,18 @@ exports.logRefuel = async (req, res) => {
   });
 
   await refuelEvent.save();
+
+ // 🔔 Notify user (driver/owner who added)
+  await notifyUser(req.user._id, "⛽ Refuel log added successfully.");
+
+  // 🔔 Notify owner if not the same as current user
+  if (trip.owner_id.toString() !== req.user._id.toString()) {
+    await notifyUser(
+      trip.owner_id,
+      `📢 Driver ${trip.driver_snapshot.name} logged a refuel: +${fuel_added}L (${payment_mode})`
+    );
+  }
+
   res.status(201).send({ message: "Refuel event logged", refuelEvent });
 };
 

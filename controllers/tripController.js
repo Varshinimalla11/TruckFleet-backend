@@ -28,6 +28,17 @@ exports.createTrip = async (req, res) => {
   });
 
   await trip.save();
+    // 🔔 Notify driver
+  await notifyUser(
+    trip.driver_id,
+    `🆕 New trip assigned: ${trip.start_city} → ${trip.end_city}`
+  );
+
+  // 🔔 Notify owner
+  await notifyUser(
+    trip.owner_id,
+    "🚛 Trip created successfully. Driver assigned."
+  );
   res.status(201).send(trip);
 };
 
@@ -36,13 +47,20 @@ exports.getAllTrips = async (req, res) => {
   if (req.user.role === "driver") {
     return res.status(403).send("Drivers are not allowed to view all trips.");
   }
-  const statusFilter = req.query.status; // ?status=ongoing
-  const filter = {
-    isDeleted: false,
-    ...(req.user.role === "owner" && { owner_id: req.user._id }),
-    ...(statusFilter && { status: statusFilter }),
-  };
+  
+  const showDeleted = req.query.showDeleted === "true";
 
+const filter = {
+  ...(req.user.role === "owner" && { owner_id: req.user._id }),
+};
+
+if (showDeleted) {
+  filter.isDeleted = true;
+} else {
+  filter.isDeleted = false;
+}
+
+ 
   const trips = await Trip.find(filter)
     .populate("truck_id")
     .populate("driver_id");
@@ -98,75 +116,12 @@ exports.startTrip = async (req, res) => {
   );
   await notifyUser(
     trip.owner_id,
-    `📢 Your driver has started the trip from ${trip.start_city}.`
+    `📢 Driver ${trip.driver_snapshot.name} has started the trip from ${trip.start_city}.`
   );
 
   res.send({ message: "Trip started", trip, firstSession });
 };
 
-// // PUT /api/trips/:id/complete
-// exports.completeTrip = async (req, res) => {
-//   const trip = await Trip.findById(req.params.id);
-//   if (!trip) return res.status(404).send("Trip not found");
-
-//   if (trip.status !== "ongoing") {
-//     return res
-//       .status(400)
-//       .send("Trip can only be completed if it is 'ongoing'.");
-//   }
-
-//   if (typeof req.body.fuel_end !== "number") {
-//     return res
-//       .status(400)
-//       .send("Fuel at end is required and must be a number.");
-//   }
-
-//   const now = new Date();
-//   trip.status = "completed";
-//   trip.end_time = now;
-//   trip.fuel_end = req.body.fuel_end;
-//   await trip.save();
-
-//   let driveSessionClosed = false;
-//   let restLogClosed = false;
-
-//   // 🛑 Auto-end any active drive session
-//   const ongoingDrive = await DriveSession.findOne({
-//     trip_id: trip._id,
-//     end_time: null,
-//   });
-
-//   if (ongoingDrive) {
-//     ongoingDrive.end_time = now;
-//     ongoingDrive.duration_hours = Number(
-//       ((now - ongoingDrive.start_time) / (1000 * 60 * 60)).toFixed(2)
-//     );
-//     await ongoingDrive.save();
-//     driveSessionClosed = true;
-//   }
-
-//   if (!ongoingDrive) {
-//     const ongoingRest = await RestLog.findOne({
-//       trip_id: trip._id,
-//       rest_end_time: null,
-//     });
-//     if (ongoingRest) {
-//       ongoingRest.rest_end_time = now;
-//       ongoingRest.duration_hours = Number(
-//         ((now - ongoingRest.rest_start_time) / (1000 * 60 * 60)).toFixed(2)
-//       );
-//       await ongoingRest.save();
-//       restLogClosed = true;
-//     }
-//   }
-
-//   res.send({
-//     message: "✅ Trip completed",
-//     trip,
-//     driveSessionClosed,
-//     restLogClosed,
-//   });
-// };
 
 exports.completeTrip = async (req, res) => {
   try {
@@ -215,8 +170,14 @@ exports.completeTrip = async (req, res) => {
     trip.fuel_end = fuel_left;
     await trip.save();
 
-    // Notify driver/owner
-    await notifyUser(req.user._id, "✅ Trip completed successfully.");
+       // 🔔 Notify driver
+    await notifyUser(trip.driver_id, "✅ You completed the trip successfully.");
+
+    // 🔔 Notify owner
+    await notifyUser(
+      trip.owner_id,
+      `📢 Driver ${trip.driver_snapshot.name} has completed the trip ${trip.start_city} → ${trip.end_city}.`
+    );
 
     res.json({
       message: "Trip completed successfully",
@@ -311,5 +272,36 @@ exports.cancelTrip = async (req, res) => {
   trip.status = "cancelled";
   await trip.save();
 
+   // 🔔 Notify driver
+  await notifyUser(trip.driver_id, "⚠️ Your trip has been cancelled.");
+  // 🔔 Notify owner
+  await notifyUser(
+    trip.owner_id,
+    `⚠️ Trip from ${trip.start_city} → ${trip.end_city} was cancelled.`
+  );
+
+
   res.send({ message: "Trip cancelled successfully", trip });
 };
+
+// GET /api/trips/my-trips - driver-specific trips
+exports.getMyTrips = async (req, res) => {
+  if (req.user.role !== "driver") {
+    return res.status(403).send("Only drivers can view their trips.");
+  }
+
+  try {
+    const trips = await Trip.find({
+      driver_id: req.user._id,
+      isDeleted: false,
+    })
+      .populate("truck_id")
+      .populate("driver_id");
+
+    res.send(trips);
+  } catch (error) {
+    console.error("Error fetching driver's trips:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+

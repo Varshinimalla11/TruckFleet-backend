@@ -5,16 +5,23 @@ const { Notification } = require("../models/notification");
 const { Truck } = require("../models/truck");
 // const { validateDriveSession } = require("../validations/driveSessionValidation"); // Uncomment if using Joi validation
 const RefuelEvent = require("../models/refuelEvent");
+const notifyUser = require("../utils/notifyUser")
+
 // Utility
-function getHoursBetween(start, end) {
-  return (new Date(end) - new Date(start)) / (1000 * 60 * 60);
+// function getHoursBetween(start, end) {
+//   return (new Date(end) - new Date(start)) / (1000 * 60 * 60);
+// }
+
+function getMinutesBetween(start, end) {
+  return (new Date(end) - new Date(start)) / (1000 * 60); // minutes
 }
 
 async function sendViolationNotification(userId, message) {
-  await Notification.create({
-    user_id: userId,
-    message,
-  });
+  await notifyUser(userId, message, { type: "warning" });
+  // await Notification.create({
+  //   user_id: userId,
+  //   message,
+  // });
 }
 
 //
@@ -61,19 +68,47 @@ exports.createDriveSession = async (req, res) => {
     start_time: { $gte: dayStart, $lte: dayEnd },
   });
 
-  let totalHours = 0;
+  // let totalHours = 0;
+  // for (let s of sessionsToday) {
+  //   totalHours += getHoursBetween(s.start_time, s.end_time);
+  // }
+
+  // if (totalHours > 8) {
+  //   const msg = "🚨 Driving exceeded 8 hours today!";
+  //   await sendViolationNotification(trip.driver_id, msg);
+  //   await sendViolationNotification(trip.owner_id, msg);
+  // }
+const now = new Date()
+    let totalMinutes = 0;
   for (let s of sessionsToday) {
-    totalHours += getHoursBetween(s.start_time, s.end_time);
+    const endTime = s.end_time || now
+    totalMinutes += getMinutesBetween(s.start_time, endTime);
   }
 
-  if (totalHours > 8) {
-    const msg = "🚨 Driving exceeded 8 hours today!";
-    await sendViolationNotification(trip.driver_id, msg);
-    await sendViolationNotification(trip.owner_id, msg);
-  }
+if (totalMinutes > 5) {
+  const msg = "🚨 Driving exceeded 5 minutes today!";
+  await sendViolationNotification(trip.driver_id, msg);
+  await sendViolationNotification(trip.owner_id, msg);
+}
 
-  const continuousDuration = getHoursBetween(start_time, end_time);
-  if (continuousDuration > 4) {
+  // const continuousDuration = getHoursBetween(start_time, end_time);
+  // if (continuousDuration > 4) {
+  //   const lastRest = await RestLog.findOne({
+  //     trip_id,
+  //     rest_end_time: { $lte: new Date(start_time) },
+  //   })
+  //     .sort({ rest_end_time: -1 })
+  //     .limit(1);
+
+  //   const msg = "🚨 Continuous driving over 4 hours without rest!";
+  //   if (!lastRest || getHoursBetween(lastRest.rest_end_time, start_time) > 0) {
+  //     await sendViolationNotification(trip.driver_id, msg);
+  //     await sendViolationNotification(trip.owner_id, msg);
+  //   }
+  // }
+
+  const continuousMinutes  = getMinutesBetween(start_time, end_time);
+  if (continuousMinutes  > 3) {
     const lastRest = await RestLog.findOne({
       trip_id,
       rest_end_time: { $lte: new Date(start_time) },
@@ -81,8 +116,8 @@ exports.createDriveSession = async (req, res) => {
       .sort({ rest_end_time: -1 })
       .limit(1);
 
-    const msg = "🚨 Continuous driving over 4 hours without rest!";
-    if (!lastRest || getHoursBetween(lastRest.rest_end_time, start_time) > 0) {
+    const msg = "🚨 Continuous driving over 3 minutes without rest!";
+    if (!lastRest || getMinutesBetween(lastRest.rest_end_time, start_time) > 0) {
       await sendViolationNotification(trip.driver_id, msg);
       await sendViolationNotification(trip.owner_id, msg);
     }
@@ -105,13 +140,15 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
   const now = new Date();
   session.end_time = now;
 
-  const duration = getHoursBetween(session.start_time, now);
+  // const duration = getHoursBetween(session.start_time, now);
+  const duration = getMinutesBetween(session.start_time, now);
+  
   session.duration_hours = Number(duration.toFixed(2));
 
   const trip = await Trip.findById(session.trip_id);
   const truck = await Truck.findById(trip.truck_id);
+  
   const mileage = truck.mileage_factor || 3;
-
   let start_fuel = trip.fuel_start ?? 100;
 
   const lastRestLog = await RestLog.findOne({
@@ -173,10 +210,22 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
 
   await rest.save();
 
-  await Notification.create({
-    user_id: req.user._id,
-    message: `🛑 Drive session ended after ${session.duration_hours} hrs. Rest started.`,
-  });
+  // await Notification.create({
+  //   user_id: req.user._id,
+  //   message: `🛑 Drive session ended after ${session.duration_hours} hrs. Rest started.`,
+  // });
+
+    // 🔔 Notify driver (current user)
+  await notifyUser(
+    req.user._id,
+    `🛑 Drive session ended after ${session.duration_hours} mins. Rest started.`
+  );
+  // 🔔 Notify owner
+  await notifyUser(
+    trip.owner_id,
+    `📢 Driver ${trip.driver_snapshot.name} ended driving after ${session.duration_hours} hrs. Rest started.`
+  );
+
 
   res.send({
     message: "Drive session ended and rest started",
@@ -208,45 +257,3 @@ exports.getSessionsByTrip = async (req, res) => {
   res.send(sessions);
 };
 
-// const Joi = require("joi");
-// const DriveSession = require("../models/driveSession");
-// const RestLog = require("../models/restLog");
-// const Trip = require("../models/trip");
-// const Truck = require("../models/truck");
-// const validateDriveSession = require("../validationModels/validateDriveSession");
-// const notifyUser = require("../utils/notifyUser");
-
-// exports.endDriveSessionAndStartRest = async (req, res) => {
-//   const { session_id } = req.params;
-
-//   const session = await DriveSession.findById(session_id);
-//   if (!session) return res.status(404).send("Drive session not found");
-
-//   if (session.end_time)
-//     return res.status(400).send("Drive session already ended");
-
-//   const now = new Date();
-//   session.end_time = now;
-
-//   const duration = (now - session.start_time) / (1000 * 60 * 60);
-//   session.duration_hours = Number(duration.toFixed(2));
-//   await session.save();
-
-//   const rest = new RestLog({
-//     trip_id: session.trip_id,
-//     rest_start_time: now,
-//     fuel_at_rest_start: session.fuel_used ?? 0,
-//   });
-//   await rest.save();
-
-//   await notifyUser(
-//     req.user._id,
-//     `🛑 Drive ended after ${session.duration_hours} hrs. Rest started.`
-//   );
-
-//   res.send({
-//     message: "Drive session ended and rest started",
-//     session,
-//     restLog: rest,
-//   });
-// };

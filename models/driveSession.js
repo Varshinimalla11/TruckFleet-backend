@@ -19,6 +19,8 @@ const DriveSessionSchema = new mongoose.Schema({
   km_covered: {
     type: Number,
   },
+  warned_at_3min: { type: Date },
+warned_at_5min: { type: Date },
   warned_at_3hr: {
     type: Date,
   },
