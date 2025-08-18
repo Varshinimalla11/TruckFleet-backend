@@ -8,5 +8,9 @@
   "socket": {
     "corsOrigin": "http://localhost:3000",
     "path": "/socket.io"
+  },
+  "admin": {
+    "email": "admin@example.com",
+    "password": "Asdfghjkl0987654321"
   }
 }

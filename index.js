@@ -5,6 +5,7 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerOptions = require("./swagger/swaggerOptions");
 const cors = require("cors");
 const { initSocket } = require("./utils/socketUtils");
+// const adminRouter = require("./admin");
 const app = express();
 
 app.use(cors());
@@ -14,7 +15,7 @@ require("./startup/validation")();
 require("./startup/db")();
 require("./cron/driveMonitoringJob");
 require("./startup/routes")(app);
-
+// app.use("/admin", adminRouter);
 const specs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
