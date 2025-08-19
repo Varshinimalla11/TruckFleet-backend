@@ -7,7 +7,7 @@ const notifyUser = require("../utils/notifyUser");
 exports.endRestAndStartDrive = async (req, res) => {
   try {
     const restLog = await RestLog.findById(req.params.rest_id);
-    console.log(restLog);
+    
     if (!restLog)
       return res.status(404).json({ message: "Rest log not found" });
 

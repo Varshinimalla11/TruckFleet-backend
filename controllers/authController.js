@@ -116,7 +116,6 @@ exports.registerDriver = async (req, res) => {
       user: _.pick(user, ["_id", "name", "email", "role"]),
     });
   } catch (err) {
-    console.error("❌ Error registering driver:", err);
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -141,7 +140,6 @@ exports.getAllDrivers = async (req, res) => {
     // If driver tries to access
     return res.status(403).send({ message: "Access denied" });
   } catch (err) {
-    console.error("Error fetching drivers:", err);
     res.status(500).send({ message: "Server error" });
   }
 };

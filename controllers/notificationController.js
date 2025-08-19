@@ -10,7 +10,6 @@ exports.getMyNotifications = async (req, res) => {
       .lean();
     res.json(notifications);
   } catch (err) {
-    console.error("❌ Error fetching notifications:", err);
     res.status(500).json("Internal Server Error");
   }
 };
@@ -33,7 +32,6 @@ exports.markAsSeen = async (req, res) => {
 
     res.json(notification);
   } catch (err) {
-    console.error("Error marking notification as seen:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -51,7 +49,6 @@ exports.markAllAsSeen = async (req, res) => {
 
     res.json({ success: true, message: "All notifications marked as seen" });
   } catch (err) {
-    console.error("Error marking all notifications as seen:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -70,7 +67,7 @@ exports.deleteNotification = async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Error deleting notification:", err);
+   
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

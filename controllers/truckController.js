@@ -40,7 +40,7 @@ exports.getTruckById = async (req, res) => {
   const truck = await Truck.findById(req.params.id);
   if (!truck) return res.status(404).send("Truck not found");
   res.send(truck);
-  console.log("🚛 Truck found:", truck);
+  
 };
 
 // PUT /api/trucks/:id

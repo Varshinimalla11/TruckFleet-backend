@@ -31,7 +31,6 @@ exports.sendInviteToken = async (req, res) => {
 
     res.send({ message: "Invite sent successfully", token });
   } catch (err) {
-    console.error("❌ Error sending invite:", err.message);
     return res.status(500).json({
       message: "Failed to send invite",
       error: err.message,

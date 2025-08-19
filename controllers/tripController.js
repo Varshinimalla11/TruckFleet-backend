@@ -298,7 +298,6 @@ exports.getMyTrips = async (req, res) => {
 
     res.send(trips);
   } catch (error) {
-    console.error("Error fetching driver's trips:", error);
     res.status(500).send("Internal Server Error");
   }
 };

@@ -11,7 +11,7 @@ function getMinutesBetween(start, end) {
 }
 
 cron.schedule("*/1 * * * *", async () => { // runs every minute
-  console.log("⏰ Cron: Checking drive violations...");
+  
   const ongoing = await DriveSession.find({ end_time: null });
 
   for (const session of ongoing) {
@@ -88,7 +88,7 @@ cron.schedule("*/1 * * * *", async () => { // runs every minute
       await session.save();
     }
   }
-  console.log("✅ Cron check done.");
+  
 });
 
 
