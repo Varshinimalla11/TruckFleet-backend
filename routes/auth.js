@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
 const auth = require("../middleware/auth");
+const {validateEmail, validatePassword} = require("../validationModels/validatePasswordReset");
 //const admin = require("../middleware/authorizeRole");
 
 /**
@@ -217,4 +218,99 @@ router.post("/register-driver", authController.registerDriver);
  */
 router.get("/my-drivers", auth, authController.getAllDrivers);
 
+/**
+ * @swagger
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *     responses:
+ *       200:
+ *         description: If email exists, reset link sent
+ *       400:
+ *         description: Invalid email format
+ *       500:
+ *         description: Server error
+ */
+router.post("/forgot-password", authController.forgotPassword);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Reset token from email
+ *               newPassword:
+ *                 type: string
+ *                 example: NewStrongPassword123
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Invalid token, password requirements not met, or new password same as current
+ *       500:
+ *         description: Server error
+ */
+router.post("/reset-password", authController.resetPassword);
+
+/**
+ * @swagger
+ * /api/auth/validate-reset-token/{token}:
+ *   get:
+ *     summary: Validate reset token
+ *     tags: [Auth]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reset token to validate
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       400:
+ *         description: Token is invalid or expired
+ *       500:
+ *         description: Server error
+ */
+router.get("/validate-reset-token/:token", authController.validateResetToken);
+
+
+
 module.exports = router;
+

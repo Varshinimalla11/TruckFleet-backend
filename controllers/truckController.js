@@ -1,5 +1,10 @@
+const mongoose = require("mongoose");
 const { Truck } = require("../models/truck");
 const { validateTruck } = require("../validationModels/validateTruck");
+
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id); 
+}
 
 // POST /api/trucks
 exports.createTruck = async (req, res) => {
@@ -13,38 +18,62 @@ exports.createTruck = async (req, res) => {
     owner_id: req.user._id,
   });
 
-  await truck.save();
-  res.status(201).send(truck);
+ try {
+    await truck.save();
+    res.status(201).send(truck);
+  } catch (err) {
+   
+    res.status(500).send("Server Error");
+  }
 };
+
 
 // GET /api/trucks
 exports.getAllTrucks = async (req, res) => {
-  // Only owner sees their own trucks; admin sees all; driver sees nothing.
-  if (req.user.role === "owner") {
-    const trucks = await Truck.find({ owner_id: req.user._id });
-    return res.send(trucks);
+  try {
+    if (req.user.role === "owner") {
+      const trucks = await Truck.find({ owner_id: req.user._id });
+      return res.send(trucks);
+    }
+    if (req.user.role === "admin") {
+      const trucks = await Truck.find({});
+      return res.send(trucks);
+    }
+    if (req.user.role === "driver") {
+      return res.status(403).json({ message: "Drivers are not permitted to view truck list." });
+    }
+    res.status(403).json({ message: "Unauthorized role" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
   }
-  if (req.user.role === "admin") {
-    const trucks = await Truck.find({});
-    return res.send(trucks);
-  }
-  if (req.user.role === "driver") {
-    // show only the truck assigned to a trip
-    return res.status(403).json({ message: "Drivers are not permitted to view truck list." });
-  }
-  res.status(403).json({ message: "Unauthorized role" });
 };
 
 // GET /api/trucks/:id
+
 exports.getTruckById = async (req, res) => {
-  const truck = await Truck.findById(req.params.id);
-  if (!truck) return res.status(404).send("Truck not found");
-  res.send(truck);
-  
+  const  id  = req.params.id;
+  if (!id || !isValidObjectId(id)) {
+    return res.status(400).send('Invalid or missing truck ID');
+  }
+ try {
+    const truck = await Truck.findById(id);
+    if (!truck) return res.status(404).send("Truck not found");
+    res.send(truck);
+  } catch (err) {
+    
+    res.status(500).send("Server Error");
+  }
 };
 
 // PUT /api/trucks/:id
 exports.updateTruck = async (req, res) => {
+  const id = req.params.id;
+
+  if (!id || !isValidObjectId(id)) {
+    return res.status(400).send("Invalid or missing truck ID");
+  }
+
   const { error } = validateTruck(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -54,16 +83,32 @@ exports.updateTruck = async (req, res) => {
     mileage_factor,
   }))(req.body);
 
-  const truck = await Truck.findByIdAndUpdate(req.params.id, updates, {
-    new: true,
-  });
-  if (!truck) return res.status(404).send("Truck not found");
-  res.send(truck);
+  try {
+    const truck = await Truck.findByIdAndUpdate(id, updates, {
+      new: true,
+    });
+    if (!truck) return res.status(404).send("Truck not found");
+    res.send(truck);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
 };
 
 // DELETE /api/trucks/:id
 exports.deleteTruck = async (req, res) => {
-  const truck = await Truck.findByIdAndDelete(req.params.id);
-  if (!truck) return res.status(404).send("Truck not found");
-  res.send({ message: "Truck deleted successfully" });
+  const id = req.params.id;
+
+  if (!id || !isValidObjectId(id)) {
+    return res.status(400).send("Invalid or missing truck ID");
+  }
+
+  try {
+    const truck = await Truck.findByIdAndDelete(id);
+    if (!truck) return res.status(404).send("Truck not found");
+    res.send({ message: "Truck deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
 };

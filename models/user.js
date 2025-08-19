@@ -67,11 +67,21 @@ const userSchema = new mongoose.Schema(
         return this.role === "driver";
       },
     },
+    resetPasswordToken: {
+      type: String,
+      default: null
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null
+    }
   },
   { timestamps: true }
 );
 userSchema.index({ role: 1 });
 userSchema.index({ ownedBy: 1 });
+userSchema.index({ resetPasswordToken: 1 });
+userSchema.index({ resetPasswordExpires: 1 });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
@@ -91,6 +101,21 @@ userSchema.methods.generateAuthToken = function () {
     config.get("jwtPrivateKey")
   );
   return token;
+};
+
+
+userSchema.methods.generatePasswordResetToken = function () {
+  const crypto = require("crypto");
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.resetPasswordToken = resetToken;
+  this.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+  return resetToken;
+};
+
+
+userSchema.methods.clearPasswordResetToken = function () {
+  this.resetPasswordToken = undefined;
+  this.resetPasswordExpires = undefined;
 };
 
 const User = mongoose.model("User", userSchema);
