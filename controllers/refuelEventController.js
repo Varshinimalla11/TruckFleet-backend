@@ -1,21 +1,17 @@
 const RefuelEvent = require("../models/refuelEvent");
 const Trip = require("../models/trip");
 const validateRefuelEvent = require("../validationModels/validateRefuel");
+const notifyUser = require("../utils/notifyUser");
 
 exports.logRefuel = async (req, res) => {
   const { error } = validateRefuelEvent(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const {
-    trip_id,
-    event_time,
-    fuel_before,
-    fuel_added,
-    payment_mode,
-  } = req.body;
+  const { trip_id, event_time, fuel_before, fuel_added, payment_mode } =
+    req.body;
 
   const fuel_after = fuel_before + fuel_added;
-  
+
   const trip = await Trip.findById(trip_id);
   if (!trip) return res.status(404).send("Trip not found");
 
@@ -38,7 +34,7 @@ exports.logRefuel = async (req, res) => {
 
   await refuelEvent.save();
 
- // 🔔 Notify user (driver/owner who added)
+  // 🔔 Notify user (driver/owner who added)
   await notifyUser(req.user._id, "⛽ Refuel log added successfully.");
 
   // 🔔 Notify owner if not the same as current user

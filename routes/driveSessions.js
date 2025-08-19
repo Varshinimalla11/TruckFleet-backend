@@ -3,39 +3,39 @@ const router = express.Router();
 const driveSessionController = require("../controllers/driveSessionController");
 const auth = require("../middleware/auth");
 
-// 📌 Create drive session manually (if allowed)
-/**
- * @swagger
- * /api/drive-sessions:
- *   post:
- *     summary: Manually create a drive session (optional)
- *     tags: [DriveSessions]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               trip_id:
- *                 type: string
- *               start_time:
- *                 type: string
- *                 format: date-time
- *               end_time:
- *                 type: string
- *                 format: date-time
- *               fuel_used:
- *                 type: number
- *               km_covered:
- *                 type: number
- *     responses:
- *       201:
- *         description: Drive session created
- */
-router.post("/", auth, driveSessionController.createDriveSession);
+// // 📌 Create drive session manually (if allowed)
+// /**
+//  * @swagger
+//  * /api/drive-sessions:
+//  *   post:
+//  *     summary: Manually create a drive session (optional)
+//  *     tags: [DriveSessions]
+//  *     security:
+//  *       - bearerAuth: []
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               trip_id:
+//  *                 type: string
+//  *               start_time:
+//  *                 type: string
+//  *                 format: date-time
+//  *               end_time:
+//  *                 type: string
+//  *                 format: date-time
+//  *               fuel_used:
+//  *                 type: number
+//  *               km_covered:
+//  *                 type: number
+//  *     responses:
+//  *       201:
+//  *         description: Drive session created
+//  */
+// router.post("/", auth, driveSessionController.createDriveSession);
 
 // 📌 End drive session and start rest
 /**

@@ -17,18 +17,26 @@ async function notifyUser(userId, message, options = {}) {
 
   if (persist) {
     notification = await Notification.create(notificationData);
-    winston.info(`Persisted notification for user ${userId}`);
+    winston.info(
+      `Persisted notification for user ${userId} with message: ${message}`
+    );
   }
 
   if (realTime) {
     try {
       await emitNotification(userId, notification || notificationData);
+      winston.info(
+        `Sent real-time notification to user ${userId} with message: ${message}`
+      );
     } catch (err) {
-      winston.error("WebSocket notification failed:", err);
+      winston.error(`WebSocket notification failed for user ${userId}:`, err);
     }
-  }
 
-  return notification;
+    return notification;
+  } else if (err) {
+    winston.error(`Failed to create notification for user ${userId}:`, err);
+    throw err;
+  }
 }
 
 function getDefaultTitle(type) {

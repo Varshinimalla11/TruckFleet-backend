@@ -28,7 +28,7 @@ exports.createTrip = async (req, res) => {
   });
 
   await trip.save();
-    // 🔔 Notify driver
+  // 🔔 Notify driver
   await notifyUser(
     trip.driver_id,
     `🆕 New trip assigned: ${trip.start_city} → ${trip.end_city}`
@@ -47,20 +47,19 @@ exports.getAllTrips = async (req, res) => {
   if (req.user.role === "driver") {
     return res.status(403).send("Drivers are not allowed to view all trips.");
   }
-  
+
   const showDeleted = req.query.showDeleted === "true";
 
-const filter = {
-  ...(req.user.role === "owner" && { owner_id: req.user._id }),
-};
+  const filter = {
+    ...(req.user.role === "owner" && { owner_id: req.user._id }),
+  };
 
-if (showDeleted) {
-  filter.isDeleted = true;
-} else {
-  filter.isDeleted = false;
-}
+  if (showDeleted) {
+    filter.isDeleted = true;
+  } else {
+    filter.isDeleted = false;
+  }
 
- 
   const trips = await Trip.find(filter)
     .populate("truck_id")
     .populate("driver_id");
@@ -122,7 +121,6 @@ exports.startTrip = async (req, res) => {
   res.send({ message: "Trip started", trip, firstSession });
 };
 
-
 exports.completeTrip = async (req, res) => {
   try {
     const { fuel_left } = req.body;
@@ -170,7 +168,7 @@ exports.completeTrip = async (req, res) => {
     trip.fuel_end = fuel_left;
     await trip.save();
 
-       // 🔔 Notify driver
+    // 🔔 Notify driver
     await notifyUser(trip.driver_id, "✅ You completed the trip successfully.");
 
     // 🔔 Notify owner
@@ -215,6 +213,7 @@ exports.updateTrip = async (req, res) => {
       "cargo_weight",
       "fuel_start",
       "start_time",
+      "status",
     ];
 
     allowedUpdates.forEach((field) => {
@@ -272,14 +271,13 @@ exports.cancelTrip = async (req, res) => {
   trip.status = "cancelled";
   await trip.save();
 
-   // 🔔 Notify driver
+  // 🔔 Notify driver
   await notifyUser(trip.driver_id, "⚠️ Your trip has been cancelled.");
   // 🔔 Notify owner
   await notifyUser(
     trip.owner_id,
     `⚠️ Trip from ${trip.start_city} → ${trip.end_city} was cancelled.`
   );
-
 
   res.send({ message: "Trip cancelled successfully", trip });
 };
@@ -304,4 +302,3 @@ exports.getMyTrips = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-

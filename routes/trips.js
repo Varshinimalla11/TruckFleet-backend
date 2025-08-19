@@ -259,6 +259,9 @@ router.put(
  *               start_time:
  *                 type: string
  *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [scheduled, ongoing, completed, cancelled]
  *             example:
  *               start_city: "Bangalore"
  *               end_city: "Chennai"
@@ -266,6 +269,7 @@ router.put(
  *               cargo_weight: 2000
  *               fuel_start: 50
  *               start_time: "2025-08-14T09:00:00Z"
+ *               status: "scheduled"
  *     responses:
  *       200:
  *         description: Trip updated successfully
@@ -373,8 +377,5 @@ router.patch(
   [auth, authorizeRole("owner", "admin")],
   tripController.cancelTrip
 );
-
-
-
 
 module.exports = router;

@@ -5,7 +5,7 @@ const { Notification } = require("../models/notification");
 const { Truck } = require("../models/truck");
 // const { validateDriveSession } = require("../validations/driveSessionValidation"); // Uncomment if using Joi validation
 const RefuelEvent = require("../models/refuelEvent");
-const notifyUser = require("../utils/notifyUser")
+const notifyUser = require("../utils/notifyUser");
 
 // Utility
 // function getHoursBetween(start, end) {
@@ -27,214 +27,237 @@ async function sendViolationNotification(userId, message) {
 //
 // 1️⃣ Create drive session manually (if allowed)
 //
-exports.createDriveSession = async (req, res) => {
-  const { trip_id, start_time, end_time, fuel_used, km_covered } = req.body;
+// exports.createDriveSession = async (req, res) => {
+//   try {
+//     const { trip_id, start_time, end_time, fuel_used, km_covered } = req.body;
 
-  // ✅ Validation (optional)
-  // const { error } = validateDriveSession(req.body);
-  // if (error) return res.status(400).send(error.details[0].message);
+//     // ✅ Validation (optional)
+//     // const { error } = validateDriveSession(req.body);
+//     // if (error) return res.status(400).send(error.details[0].message);
 
-  if (new Date(end_time) <= new Date(start_time)) {
-    return res.status(400).send("End time must be after start time");
-  }
+//     if (new Date(end_time) <= new Date(start_time)) {
+//       return res.status(400).send("End time must be after start time");
+//     }
 
-  const trip = await Trip.findById(trip_id);
-  if (!trip) return res.status(404).send("Trip not found");
+//     const trip = await Trip.findById(trip_id);
+//     if (!trip) return res.status(404).send("Trip not found");
 
-  if (
-    req.user.role === "driver" &&
-    req.user._id.toString() !== trip.driver_id.toString()
-  )
-    return res.status(403).send("You are not authorized to log this session");
+//     if (
+//       req.user.role === "driver" &&
+//       req.user._id.toString() !== trip.driver_id.toString()
+//     )
+//       return res.status(403).send("You are not authorized to log this session");
 
-  const session = new DriveSession({
-    trip_id,
-    start_time,
-    end_time,
-    fuel_used,
-    km_covered,
-  });
+//     const session = new DriveSession({
+//       trip_id,
+//       start_time,
+//       end_time,
+//       fuel_used,
+//       km_covered,
+//     });
 
-  await session.save();
+//     await session.save();
 
-  // === Violation Checks ===
-  const dayStart = new Date(start_time);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(start_time);
-  dayEnd.setHours(23, 59, 59, 999);
+//     // === Violation Checks ===
+//     const dayStart = new Date(start_time);
+//     dayStart.setHours(0, 0, 0, 0);
+//     const dayEnd = new Date(start_time);
+//     dayEnd.setHours(23, 59, 59, 999);
 
-  const sessionsToday = await DriveSession.find({
-    trip_id,
-    start_time: { $gte: dayStart, $lte: dayEnd },
-  });
+//     const sessionsToday = await DriveSession.find({
+//       trip_id,
+//       start_time: { $gte: dayStart, $lte: dayEnd },
+//     });
 
-  // let totalHours = 0;
-  // for (let s of sessionsToday) {
-  //   totalHours += getHoursBetween(s.start_time, s.end_time);
-  // }
+//     // ...existing code...
 
-  // if (totalHours > 8) {
-  //   const msg = "🚨 Driving exceeded 8 hours today!";
-  //   await sendViolationNotification(trip.driver_id, msg);
-  //   await sendViolationNotification(trip.owner_id, msg);
-  // }
-const now = new Date()
-    let totalMinutes = 0;
-  for (let s of sessionsToday) {
-    const endTime = s.end_time || now
-    totalMinutes += getMinutesBetween(s.start_time, endTime);
-  }
+//     res.status(201).send({ message: "Drive session logged", session });
+//   } catch (err) {
+//     res.status(500).send({ message: "Internal Server Error" });
+//   }
+//   const now = new Date();
+//   let totalMinutes = 0;
+//   for (let s of sessionsToday) {
+//     const endTime = s.end_time || now;
+//     totalMinutes += getMinutesBetween(s.start_time, endTime);
+//   }
 
-if (totalMinutes > 5) {
-  const msg = "🚨 Driving exceeded 5 minutes today!";
-  await sendViolationNotification(trip.driver_id, msg);
-  await sendViolationNotification(trip.owner_id, msg);
-}
+//   if (totalMinutes > 5) {
+//     const driverName =
+//       trip.driver_snapshot?.name ||
+//       trip.driver_id?.toString() ||
+//       "Unknown Driver";
+//     const msgDriver5Min = `🚨 You (Driver ${driverName}) have exceeded driving time by 5 minutes today!`;
+//     const msgOwner5Min = `🚨 Driver ${driverName} has exceeded driving time by 5 minutes today!`;
 
-  // const continuousDuration = getHoursBetween(start_time, end_time);
-  // if (continuousDuration > 4) {
-  //   const lastRest = await RestLog.findOne({
-  //     trip_id,
-  //     rest_end_time: { $lte: new Date(start_time) },
-  //   })
-  //     .sort({ rest_end_time: -1 })
-  //     .limit(1);
+//     await notifyUser(trip.driver_id, msgDriver5Min);
+//     await notifyUser(trip.owner_id, msgOwner5Min);
+//   }
 
-  //   const msg = "🚨 Continuous driving over 4 hours without rest!";
-  //   if (!lastRest || getHoursBetween(lastRest.rest_end_time, start_time) > 0) {
-  //     await sendViolationNotification(trip.driver_id, msg);
-  //     await sendViolationNotification(trip.owner_id, msg);
-  //   }
-  // }
+//   // const continuousDuration = getHoursBetween(start_time, end_time);
+//   // if (continuousDuration > 4) {
+//   //   const lastRest = await RestLog.findOne({
+//   //     trip_id,
+//   //     rest_end_time: { $lte: new Date(start_time) },
+//   //   })
+//   //     .sort({ rest_end_time: -1 })
+//   //     .limit(1);
 
-  const continuousMinutes  = getMinutesBetween(start_time, end_time);
-  if (continuousMinutes  > 3) {
-    const lastRest = await RestLog.findOne({
-      trip_id,
-      rest_end_time: { $lte: new Date(start_time) },
-    })
-      .sort({ rest_end_time: -1 })
-      .limit(1);
+//   //   const msg = "🚨 Continuous driving over 4 hours without rest!";
+//   //   if (!lastRest || getHoursBetween(lastRest.rest_end_time, start_time) > 0) {
+//   //     await sendViolationNotification(trip.driver_id, msg);
+//   //     await sendViolationNotification(trip.owner_id, msg);
+//   //   }
+//   // }
 
-    const msg = "🚨 Continuous driving over 3 minutes without rest!";
-    if (!lastRest || getMinutesBetween(lastRest.rest_end_time, start_time) > 0) {
-      await sendViolationNotification(trip.driver_id, msg);
-      await sendViolationNotification(trip.owner_id, msg);
-    }
-  }
+//   const continuousMinutes = getMinutesBetween(start_time, end_time);
+//   if (continuousMinutes > 3) {
+//     const lastRest = await RestLog.findOne({
+//       trip_id,
+//       rest_end_time: { $lte: new Date(start_time) },
+//     })
+//       .sort({ rest_end_time: -1 })
+//       .limit(1);
 
-  res.status(201).send({ message: "Drive session logged", session });
-};
+//     const driverName =
+//       trip.driver_snapshot?.name ||
+//       trip.driver_id?.toString() ||
+//       "Unknown Driver";
+//     const msgDriver3Min = `🚨 You (Driver ${driverName}) have driven continuously over 3 minutes without rest!`;
+//     const msgOwner3Min = `🚨 Driver ${driverName} has driven continuously over 3 minutes without rest!`;
+
+//     if (
+//       !lastRest ||
+//       getMinutesBetween(lastRest.rest_end_time, start_time) > 0
+//     ) {
+//       await notifyUser(trip.driver_id, msgDriver3Min);
+//       await notifyUser(trip.owner_id, msgOwner3Min);
+//     }
+//   }
+
+//   res.status(201).send({ message: "Drive session logged", session });
+// };
 
 //
 // End drive session and start rest
 //
 exports.endDriveSessionAndStartRest = async (req, res) => {
-  const { session_id } = req.params;
-  const { fuel_left } = req.body;
+  try {
+    const { session_id } = req.params;
+    const { fuel_left } = req.body;
 
-  const session = await DriveSession.findById(session_id);
-  if (!session) return res.status(404).send("Drive session not found");
-  if (session.end_time) return res.status(400).send("Session already ended");
+    const session = await DriveSession.findById(session_id);
+    if (!session) return res.status(404).send("Drive session not found");
+    if (session.end_time) return res.status(400).send("Session already ended");
 
-  const now = new Date();
-  session.end_time = now;
+    const now = new Date();
+    session.end_time = now;
 
-  // const duration = getHoursBetween(session.start_time, now);
-  const duration = getMinutesBetween(session.start_time, now);
-  
-  session.duration_hours = Number(duration.toFixed(2));
+    // const duration = getHoursBetween(session.start_time, now);
+    const duration = getMinutesBetween(session.start_time, now);
 
-  const trip = await Trip.findById(session.trip_id);
-  const truck = await Truck.findById(trip.truck_id);
-  
-  const mileage = truck.mileage_factor || 3;
-  let start_fuel = trip.fuel_start ?? 100;
+    session.duration_hours = Number(duration.toFixed(2));
 
-  const lastRestLog = await RestLog.findOne({
-    trip_id: trip._id,
-    rest_end_time: { $lte: session.start_time },
-  }).sort({ rest_end_time: -1 });
+    const trip = await Trip.findById(session.trip_id);
+    const truck = await Truck.findById(trip.truck_id);
 
-  if (lastRestLog && typeof lastRestLog.fuel_at_rest_end === "number") {
-    start_fuel = lastRestLog.fuel_at_rest_end; // ✅ Take fuel after rest ends
-  }
+    const mileage = truck.mileage_factor || 3;
+    let start_fuel = trip.fuel_start ?? 100;
 
-  const lastDrive = await DriveSession.findOne({
-    trip_id: trip._id,
-    end_time: { $lte: session.start_time },
-  }).sort({ end_time: -1 });
+    const lastRestLog = await RestLog.findOne({
+      trip_id: trip._id,
+      rest_end_time: { $lte: session.start_time },
+    }).sort({ rest_end_time: -1 });
 
-  if (lastDrive && typeof lastDrive.fuel_left === "number") {
-    start_fuel = lastDrive.fuel_left;
-  }
+    if (lastRestLog && typeof lastRestLog.fuel_at_rest_end === "number") {
+      start_fuel = lastRestLog.fuel_at_rest_end; // ✅ Take fuel after rest ends
+    }
 
-  const refuelsDuringDrive = await RefuelEvent.find({
-    trip_id: trip._id,
-    event_time: { $gte: session.start_time, $lte: now },
-  });
+    const lastDrive = await DriveSession.findOne({
+      trip_id: trip._id,
+      end_time: { $lte: session.start_time },
+    }).sort({ end_time: -1 });
 
-  const fuelAddedTotal = refuelsDuringDrive.reduce(
-    (sum, r) => sum + (r.fuel_added || 0),
-    0
-  );
+    if (lastDrive && typeof lastDrive.fuel_left === "number") {
+      start_fuel = lastDrive.fuel_left;
+    }
 
-  start_fuel += fuelAddedTotal;
+    const refuelsDuringDrive = await RefuelEvent.find({
+      trip_id: trip._id,
+      event_time: { $gte: session.start_time, $lte: now },
+    });
 
-  let fuel_used = start_fuel - fuel_left;
-  if (fuel_used < 0) fuel_used = 0;
+    const fuelAddedTotal = refuelsDuringDrive.reduce(
+      (sum, r) => sum + (r.fuel_added || 0),
+      0
+    );
 
-  let km_covered = fuel_used * mileage;
-  if (km_covered < 0) km_covered = 0;
+    start_fuel += fuelAddedTotal;
 
-  const totalKmBefore = await DriveSession.aggregate([
-    { $match: { trip_id: trip._id, _id: { $ne: session._id } } },
-    { $group: { _id: null, total: { $sum: "$km_covered" } } },
-  ]);
-  const kmAlready = totalKmBefore.length ? totalKmBefore[0].total : 0;
+    let fuel_used = start_fuel - fuel_left;
+    if (fuel_used < 0) fuel_used = 0;
 
-  if (kmAlready + km_covered > trip.total_km) {
-    km_covered = Math.max(trip.total_km - kmAlready, 0);
-  }
+    let km_covered = fuel_used * mileage;
+    if (km_covered < 0) km_covered = 0;
 
-  session.fuel_used = Number(fuel_used.toFixed(2));
-  session.km_covered = Number(km_covered.toFixed(2));
-  session.fuel_left = fuel_left;
-  await session.save();
+    const totalKmBefore = await DriveSession.aggregate([
+      { $match: { trip_id: trip._id, _id: { $ne: session._id } } },
+      { $group: { _id: null, total: { $sum: "$km_covered" } } },
+    ]);
+    const kmAlready = totalKmBefore.length ? totalKmBefore[0].total : 0;
 
-  const rest = new RestLog({
-    trip_id: session.trip_id,
-    rest_start_time: now,
-    fuel_at_rest_start: fuel_left,
-  });
+    if (kmAlready + km_covered > trip.total_km) {
+      km_covered = Math.max(trip.total_km - kmAlready, 0);
+    }
 
-  await rest.save();
+    session.fuel_used = Number(fuel_used.toFixed(2));
+    session.km_covered = Number(km_covered.toFixed(2));
+    session.fuel_left = fuel_left;
+    await session.save();
 
-  // await Notification.create({
-  //   user_id: req.user._id,
-  //   message: `🛑 Drive session ended after ${session.duration_hours} hrs. Rest started.`,
-  // });
+    const rest = new RestLog({
+      trip_id: session.trip_id,
+      rest_start_time: now,
+      fuel_at_rest_start: fuel_left,
+    });
+
+    await rest.save();
+
+    // await Notification.create({
+    //   user_id: req.user._id,
+    //   message: `🛑 Drive session ended after ${session.duration_hours} hrs. Rest started.`,
+    // });
 
     // 🔔 Notify driver (current user)
-  await notifyUser(
-    req.user._id,
-    `🛑 Drive session ended after ${session.duration_hours} mins. Rest started.`
-  );
-  // 🔔 Notify owner
-  await notifyUser(
-    trip.owner_id,
-    `📢 Driver ${trip.driver_snapshot.name} ended driving after ${session.duration_hours} hrs. Rest started.`
-  );
+    await notifyUser(
+      req.user._id,
+      `🛑 Your drive session ended after ${duration.toFixed(
+        2
+      )} minutes. Rest started.`
+    );
+    // 🔔 Notify owner
+    const driverName = trip.driver_snapshot?.name || "Unknown Driver";
+    await notifyUser(
+      trip.owner_id,
+      `📢 Driver ${driverName} ended driving after ${duration.toFixed(
+        2
+      )} minutes. Rest started.`
+    );
 
-
-  res.send({
-    message: "Drive session ended and rest started",
-    fuel_used: session.fuel_used,
-    km_covered: session.km_covered,
-    remaining_km_in_trip: Math.max(trip.total_km - (kmAlready + km_covered), 0),
-    session,
-    restLog: rest,
-  });
+    res.send({
+      message: "Drive session ended and rest started",
+      fuel_used: session.fuel_used,
+      km_covered: session.km_covered,
+      remaining_km_in_trip: Math.max(
+        trip.total_km - (kmAlready + km_covered),
+        0
+      ),
+      session,
+      restLog: rest,
+    });
+  } catch (err) {
+    res.status(500).send({ message: "Internal Server Error" });
+  }
 };
 
 //
@@ -256,4 +279,3 @@ exports.getSessionsByTrip = async (req, res) => {
   const sessions = await DriveSession.find({ trip_id: tripId });
   res.send(sessions);
 };
-
