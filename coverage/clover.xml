@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1755624892532" clover="3.2.0">
-  <project timestamp="1755624892532" name="All files">
-    <metrics statements="588" coveredstatements="496" conditionals="202" coveredconditionals="146" methods="69" coveredmethods="45" elements="859" coveredelements="687" complexity="0" loc="588" ncloc="588" packages="5" files="28" classes="28"/>
+<coverage generated="1755663014230" clover="3.2.0">
+  <project timestamp="1755663014231" name="All files">
+    <metrics statements="660" coveredstatements="565" conditionals="226" coveredconditionals="170" methods="74" coveredmethods="49" elements="960" coveredelements="784" complexity="0" loc="660" ncloc="660" packages="5" files="26" classes="26"/>
     <package name="common">
       <metrics statements="10" coveredstatements="7" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
-      <file name="validate.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\common\validate.js">
+      <file name="validate.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\common\validate.js">
         <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
       </file>
-      <file name="validateObjectId.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\common\validateObjectId.js">
+      <file name="validateObjectId.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\common\validateObjectId.js">
         <metrics statements="7" coveredstatements="4" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="4" type="stmt"/>
         <line num="2" count="4" type="stmt"/>
@@ -22,9 +22,9 @@
       </file>
     </package>
     <package name="controllers">
-      <metrics statements="441" coveredstatements="412" conditionals="180" coveredconditionals="146" methods="47" coveredmethods="45"/>
-      <file name="authController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\authController.js">
-        <metrics statements="68" coveredstatements="68" conditionals="28" coveredconditionals="28" methods="5" coveredmethods="5"/>
+      <metrics statements="512" coveredstatements="482" conditionals="204" coveredconditionals="170" methods="51" coveredmethods="49"/>
+      <file name="authController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\authController.js">
+        <metrics statements="122" coveredstatements="122" conditionals="40" coveredconditionals="40" methods="8" coveredmethods="8"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -32,69 +32,123 @@
         <line num="5" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
         <line num="9" count="1" type="stmt"/>
-        <line num="10" count="5" type="stmt"/>
-        <line num="11" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="13" count="4" type="stmt"/>
-        <line num="14" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="15" count="1" type="stmt"/>
-        <line num="17" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="18" count="2" type="stmt"/>
-        <line num="19" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="20" count="1" type="stmt"/>
-        <line num="26" count="2" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="5" type="stmt"/>
+        <line num="15" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="17" count="4" type="stmt"/>
+        <line num="18" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="21" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="1" type="stmt"/>
         <line num="30" count="2" type="stmt"/>
-        <line num="31" count="2" type="stmt"/>
-        <line num="33" count="2" type="stmt"/>
         <line num="34" count="2" type="stmt"/>
-        <line num="36" count="2" type="stmt"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="37" count="2" type="stmt"/>
         <line num="38" count="2" type="stmt"/>
-        <line num="41" count="1" type="stmt"/>
-        <line num="42" count="3" type="stmt"/>
-        <line num="44" count="3" type="stmt"/>
-        <line num="45" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="47" count="2" type="stmt"/>
-        <line num="48" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
+        <line num="40" count="2" type="stmt"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
+        <line num="46" count="3" type="stmt"/>
+        <line num="48" count="3" type="stmt"/>
+        <line num="49" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="52" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="54" count="1" type="stmt"/>
-        <line num="55" count="2" type="stmt"/>
-        <line num="56" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="57" count="1" type="stmt"/>
-        <line num="60" count="1" type="stmt"/>
-        <line num="61" count="6" type="stmt"/>
-        <line num="70" count="6" type="stmt"/>
-        <line num="72" count="6" type="cond" truecount="2" falsecount="0"/>
-        <line num="73" count="1" type="stmt"/>
-        <line num="76" count="5" type="stmt"/>
-        <line num="77" count="4" type="cond" truecount="4" falsecount="0"/>
-        <line num="78" count="1" type="stmt"/>
-        <line num="84" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="85" count="1" type="stmt"/>
-        <line num="91" count="2" type="stmt"/>
-        <line num="92" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="93" count="1" type="stmt"/>
-        <line num="96" count="1" type="stmt"/>
-        <line num="107" count="1" type="stmt"/>
-        <line num="110" count="1" type="stmt"/>
+        <line num="55" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="59" count="2" type="stmt"/>
+        <line num="60" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="65" count="6" type="stmt"/>
+        <line num="74" count="6" type="stmt"/>
+        <line num="76" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="80" count="5" type="stmt"/>
+        <line num="81" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="88" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="89" count="1" type="stmt"/>
+        <line num="95" count="2" type="stmt"/>
+        <line num="96" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="97" count="1" type="stmt"/>
+        <line num="100" count="1" type="stmt"/>
         <line num="111" count="1" type="stmt"/>
-        <line num="113" count="1" type="stmt"/>
         <line num="114" count="1" type="stmt"/>
-        <line num="119" count="1" type="stmt"/>
-        <line num="120" count="1" type="stmt"/>
-        <line num="124" count="1" type="stmt"/>
-        <line num="125" count="4" type="stmt"/>
-        <line num="127" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="128" count="2" type="stmt"/>
-        <line num="132" count="1" type="stmt"/>
-        <line num="136" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="137" count="1" type="stmt"/>
-        <line num="138" count="1" type="stmt"/>
-        <line num="142" count="1" type="stmt"/>
-        <line num="144" count="1" type="stmt"/>
+        <line num="115" count="1" type="stmt"/>
+        <line num="117" count="1" type="stmt"/>
+        <line num="118" count="1" type="stmt"/>
+        <line num="123" count="1" type="stmt"/>
+        <line num="127" count="1" type="stmt"/>
+        <line num="128" count="4" type="stmt"/>
+        <line num="130" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="131" count="2" type="stmt"/>
+        <line num="135" count="1" type="stmt"/>
+        <line num="139" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="140" count="1" type="stmt"/>
+        <line num="141" count="1" type="stmt"/>
         <line num="145" count="1" type="stmt"/>
+        <line num="147" count="1" type="stmt"/>
+        <line num="151" count="1" type="stmt"/>
+        <line num="152" count="5" type="stmt"/>
+        <line num="153" count="5" type="stmt"/>
+        <line num="154" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="156" count="4" type="stmt"/>
+        <line num="158" count="4" type="stmt"/>
+        <line num="159" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="161" count="1" type="stmt"/>
+        <line num="167" count="2" type="stmt"/>
+        <line num="168" count="2" type="stmt"/>
+        <line num="171" count="2" type="stmt"/>
+        <line num="172" count="2" type="stmt"/>
+        <line num="173" count="2" type="stmt"/>
+        <line num="176" count="2" type="stmt"/>
+        <line num="177" count="2" type="stmt"/>
+        <line num="180" count="1" type="stmt"/>
+        <line num="187" count="1" type="stmt"/>
+        <line num="189" count="1" type="stmt"/>
+        <line num="190" count="1" type="stmt"/>
+        <line num="191" count="1" type="stmt"/>
+        <line num="193" count="1" type="stmt"/>
+        <line num="197" count="1" type="stmt"/>
+        <line num="202" count="1" type="stmt"/>
+        <line num="203" count="1" type="stmt"/>
+        <line num="207" count="1" type="stmt"/>
+        <line num="208" count="5" type="stmt"/>
+        <line num="209" count="5" type="stmt"/>
+        <line num="210" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="212" count="4" type="stmt"/>
+        <line num="215" count="4" type="stmt"/>
+        <line num="220" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="221" count="1" type="stmt"/>
+        <line num="226" count="2" type="stmt"/>
+        <line num="227" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="228" count="1" type="stmt"/>
+        <line num="233" count="1" type="stmt"/>
+        <line num="234" count="1" type="stmt"/>
+        <line num="235" count="1" type="stmt"/>
+        <line num="236" count="1" type="stmt"/>
+        <line num="239" count="1" type="stmt"/>
+        <line num="245" count="1" type="stmt"/>
+        <line num="250" count="1" type="stmt"/>
+        <line num="251" count="1" type="stmt"/>
+        <line num="255" count="1" type="stmt"/>
+        <line num="256" count="3" type="stmt"/>
+        <line num="257" count="3" type="stmt"/>
+        <line num="259" count="3" type="stmt"/>
+        <line num="264" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="265" count="1" type="stmt"/>
+        <line num="271" count="1" type="stmt"/>
+        <line num="277" count="1" type="stmt"/>
+        <line num="278" count="1" type="stmt"/>
       </file>
-      <file name="dashboardController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\dashboardController.js">
+      <file name="dashboardController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\dashboardController.js">
         <metrics statements="44" coveredstatements="44" conditionals="12" coveredconditionals="9" methods="9" coveredmethods="9"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -141,7 +195,7 @@
         <line num="80" count="2" type="stmt"/>
         <line num="82" count="1" type="stmt"/>
       </file>
-      <file name="driveSessionController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\driveSessionController.js">
+      <file name="driveSessionController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\driveSessionController.js">
         <metrics statements="61" coveredstatements="33" conditionals="34" coveredconditionals="12" methods="5" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -153,12 +207,12 @@
         <line num="16" count="1" type="stmt"/>
         <line num="20" count="0" type="stmt"/>
         <line num="144" count="1" type="stmt"/>
-        <line num="145" count="3" type="stmt"/>
-        <line num="146" count="3" type="stmt"/>
-        <line num="147" count="3" type="stmt"/>
-        <line num="149" count="3" type="stmt"/>
-        <line num="150" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="151" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="145" count="6" type="stmt"/>
+        <line num="146" count="6" type="stmt"/>
+        <line num="147" count="6" type="stmt"/>
+        <line num="149" count="6" type="stmt"/>
+        <line num="150" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="151" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="153" count="1" type="stmt"/>
         <line num="154" count="1" type="stmt"/>
         <line num="157" count="1" type="stmt"/>
@@ -195,18 +249,18 @@
         <line num="239" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="240" count="0" type="stmt"/>
         <line num="247" count="0" type="stmt"/>
-        <line num="259" count="1" type="stmt"/>
+        <line num="259" count="2" type="stmt"/>
         <line num="266" count="1" type="stmt"/>
-        <line num="267" count="4" type="stmt"/>
-        <line num="269" count="4" type="stmt"/>
-        <line num="270" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="272" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="276" count="1" type="stmt"/>
-        <line num="279" count="2" type="stmt"/>
-        <line num="280" count="2" type="stmt"/>
+        <line num="267" count="7" type="stmt"/>
+        <line num="269" count="7" type="stmt"/>
+        <line num="270" count="7" type="cond" truecount="2" falsecount="0"/>
+        <line num="272" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="276" count="2" type="stmt"/>
+        <line num="279" count="3" type="stmt"/>
+        <line num="280" count="3" type="stmt"/>
       </file>
-      <file name="inviteController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\inviteController.js">
-        <metrics statements="27" coveredstatements="27" conditionals="8" coveredconditionals="8" methods="2" coveredmethods="2"/>
+      <file name="inviteController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\inviteController.js">
+        <metrics statements="26" coveredstatements="26" conditionals="8" coveredconditionals="8" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -224,50 +278,45 @@
         <line num="30" count="1" type="stmt"/>
         <line num="32" count="1" type="stmt"/>
         <line num="34" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="42" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="42" count="5" type="stmt"/>
         <line num="43" count="5" type="stmt"/>
-        <line num="44" count="5" type="stmt"/>
-        <line num="45" count="5" type="cond" truecount="2" falsecount="0"/>
-        <line num="47" count="4" type="stmt"/>
-        <line num="48" count="3" type="cond" truecount="4" falsecount="0"/>
-        <line num="49" count="2" type="stmt"/>
-        <line num="52" count="1" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
+        <line num="44" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="46" count="4" type="stmt"/>
+        <line num="47" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="48" count="2" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="53" count="1" type="stmt"/>
       </file>
-      <file name="notificationController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\notificationController.js">
-        <metrics statements="29" coveredstatements="29" conditionals="4" coveredconditionals="4" methods="4" coveredmethods="4"/>
+      <file name="notificationController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\notificationController.js">
+        <metrics statements="25" coveredstatements="25" conditionals="4" coveredconditionals="4" methods="4" coveredmethods="4"/>
         <line num="1" count="1" type="stmt"/>
         <line num="4" count="1" type="stmt"/>
         <line num="5" count="2" type="stmt"/>
         <line num="6" count="2" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
         <line num="13" count="1" type="stmt"/>
-        <line num="14" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="3" type="stmt"/>
         <line num="20" count="3" type="stmt"/>
-        <line num="21" count="3" type="stmt"/>
-        <line num="30" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="31" count="1" type="stmt"/>
-        <line num="34" count="1" type="stmt"/>
-        <line num="36" count="1" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
-        <line num="42" count="1" type="stmt"/>
-        <line num="43" count="2" type="stmt"/>
-        <line num="44" count="2" type="stmt"/>
+        <line num="29" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
+        <line num="35" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="41" count="2" type="stmt"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="50" count="1" type="stmt"/>
         <line num="52" count="1" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
-        <line num="55" count="1" type="stmt"/>
-        <line num="60" count="1" type="stmt"/>
-        <line num="61" count="3" type="stmt"/>
-        <line num="62" count="3" type="stmt"/>
-        <line num="67" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="58" count="3" type="stmt"/>
+        <line num="59" count="3" type="stmt"/>
+        <line num="64" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="65" count="1" type="stmt"/>
         <line num="68" count="1" type="stmt"/>
         <line num="71" count="1" type="stmt"/>
-        <line num="73" count="1" type="stmt"/>
-        <line num="74" count="1" type="stmt"/>
       </file>
-      <file name="refuelEventController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\refuelEventController.js">
+      <file name="refuelEventController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\refuelEventController.js">
         <metrics statements="27" coveredstatements="27" conditionals="16" coveredconditionals="15" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -297,8 +346,8 @@
         <line num="64" count="1" type="stmt"/>
         <line num="65" count="1" type="stmt"/>
       </file>
-      <file name="restLogController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\restLogController.js">
-        <metrics statements="27" coveredstatements="27" conditionals="6" coveredconditionals="4" methods="2" coveredmethods="2"/>
+      <file name="restLogController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\restLogController.js">
+        <metrics statements="26" coveredstatements="26" conditionals="6" coveredconditionals="4" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -307,7 +356,6 @@
         <line num="7" count="1" type="stmt"/>
         <line num="8" count="3" type="stmt"/>
         <line num="9" count="3" type="stmt"/>
-        <line num="10" count="2" type="stmt"/>
         <line num="11" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="12" count="1" type="stmt"/>
         <line num="14" count="1" type="stmt"/>
@@ -327,7 +375,7 @@
         <line num="53" count="1" type="stmt"/>
         <line num="55" count="1" type="stmt"/>
       </file>
-      <file name="tripController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\tripController.js">
+      <file name="tripController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\tripController.js">
         <metrics statements="124" coveredstatements="123" conditionals="56" coveredconditionals="50" methods="12" coveredmethods="12"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -454,54 +502,77 @@
         <line num="299" count="1" type="stmt"/>
         <line num="301" count="1" type="stmt"/>
       </file>
-      <file name="truckController.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\controllers\truckController.js">
-        <metrics statements="34" coveredstatements="34" conditionals="16" coveredconditionals="16" methods="6" coveredmethods="6"/>
+      <file name="truckController.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\controllers\truckController.js">
+        <metrics statements="57" coveredstatements="56" conditionals="28" coveredconditionals="28" methods="7" coveredmethods="7"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
-        <line num="5" count="1" type="stmt"/>
-        <line num="6" count="2" type="stmt"/>
-        <line num="7" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
-        <line num="17" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="6" count="12" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="2" type="stmt"/>
+        <line num="12" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="14" count="1" type="stmt"/>
         <line num="21" count="1" type="stmt"/>
-        <line num="23" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="24" count="1" type="stmt"/>
-        <line num="25" count="1" type="stmt"/>
-        <line num="27" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="28" count="1" type="stmt"/>
-        <line num="29" count="1" type="stmt"/>
-        <line num="31" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="33" count="5" type="stmt"/>
+        <line num="34" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="35" count="2" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="38" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="39" count="1" type="stmt"/>
-        <line num="40" count="2" type="stmt"/>
-        <line num="41" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="42" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="42" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="43" count="1" type="stmt"/>
+        <line num="45" count="1" type="stmt"/>
         <line num="47" count="1" type="stmt"/>
-        <line num="48" count="3" type="stmt"/>
-        <line num="49" count="3" type="cond" truecount="2" falsecount="0"/>
-        <line num="51" count="2" type="stmt"/>
-        <line num="57" count="2" type="stmt"/>
-        <line num="60" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="61" count="1" type="stmt"/>
+        <line num="48" count="1" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="55" count="4" type="stmt"/>
+        <line num="56" count="4" type="cond" truecount="4" falsecount="0"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="59" count="3" type="stmt"/>
+        <line num="60" count="3" type="stmt"/>
+        <line num="61" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="62" count="1" type="stmt"/>
         <line num="65" count="1" type="stmt"/>
-        <line num="66" count="2" type="stmt"/>
-        <line num="67" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="68" count="1" type="stmt"/>
+        <line num="70" count="1" type="stmt"/>
+        <line num="71" count="5" type="stmt"/>
+        <line num="73" count="5" type="cond" truecount="4" falsecount="0"/>
+        <line num="74" count="1" type="stmt"/>
+        <line num="77" count="4" type="stmt"/>
+        <line num="78" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="80" count="3" type="stmt"/>
+        <line num="86" count="3" type="stmt"/>
+        <line num="87" count="3" type="stmt"/>
+        <line num="90" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="91" count="1" type="stmt"/>
+        <line num="93" count="1" type="stmt"/>
+        <line num="94" count="1" type="stmt"/>
+        <line num="99" count="1" type="stmt"/>
+        <line num="100" count="6" type="stmt"/>
+        <line num="102" count="6" type="cond" truecount="4" falsecount="0"/>
+        <line num="103" count="1" type="stmt"/>
+        <line num="106" count="5" type="stmt"/>
+        <line num="107" count="5" type="stmt"/>
+        <line num="108" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="109" count="2" type="stmt"/>
+        <line num="111" count="1" type="stmt"/>
+        <line num="112" count="1" type="stmt"/>
       </file>
     </package>
     <package name="models">
-      <metrics statements="59" coveredstatements="46" conditionals="2" coveredconditionals="0" methods="7" coveredmethods="0"/>
-      <file name="driveSession.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\driveSession.js">
+      <metrics statements="69" coveredstatements="49" conditionals="2" coveredconditionals="0" methods="9" coveredmethods="0"/>
+      <file name="driveSession.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\driveSession.js">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
         <line num="32" count="4" type="stmt"/>
         <line num="33" count="4" type="stmt"/>
       </file>
-      <file name="inviteToken.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\inviteToken.js">
+      <file name="inviteToken.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\inviteToken.js">
         <metrics statements="5" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="2" type="stmt"/>
@@ -509,7 +580,7 @@
         <line num="34" count="2" type="stmt"/>
         <line num="36" count="2" type="stmt"/>
       </file>
-      <file name="notification.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\notification.js">
+      <file name="notification.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\notification.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
@@ -517,10 +588,7 @@
         <line num="40" count="6" type="stmt"/>
         <line num="41" count="6" type="stmt"/>
       </file>
-      <file name="owner.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\owner.js">
-        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      </file>
-      <file name="refuelEvent.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\refuelEvent.js">
+      <file name="refuelEvent.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\refuelEvent.js">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="2" type="stmt"/>
         <line num="2" count="2" type="stmt"/>
@@ -528,32 +596,31 @@
         <line num="32" count="2" type="stmt"/>
         <line num="33" count="2" type="stmt"/>
       </file>
-      <file name="restLog.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\restLog.js">
+      <file name="restLog.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\restLog.js">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
         <line num="3" count="3" type="stmt"/>
         <line num="24" count="3" type="stmt"/>
         <line num="25" count="3" type="stmt"/>
       </file>
-      <file name="trip.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\trip.js">
+      <file name="trip.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\trip.js">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="5" type="stmt"/>
         <line num="3" count="5" type="stmt"/>
         <line num="90" count="5" type="stmt"/>
         <line num="92" count="5" type="stmt"/>
       </file>
-      <file name="truck.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\truck.js">
-        <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="truck.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\truck.js">
+        <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
-        <line num="2" count="3" type="stmt"/>
-        <line num="4" count="3" type="stmt"/>
+        <line num="3" count="3" type="stmt"/>
         <line num="29" count="3" type="stmt"/>
         <line num="31" count="3" type="stmt"/>
         <line num="33" count="3" type="stmt"/>
         <line num="34" count="3" type="stmt"/>
       </file>
-      <file name="user.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\models\user.js">
-        <metrics statements="25" coveredstatements="13" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="0"/>
+      <file name="user.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\models\user.js">
+        <metrics statements="36" coveredstatements="17" conditionals="2" coveredconditionals="0" methods="8" coveredmethods="0"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
         <line num="3" count="3" type="stmt"/>
@@ -564,38 +631,37 @@
         <line num="54" count="0" type="stmt"/>
         <line num="60" count="0" type="stmt"/>
         <line num="67" count="0" type="stmt"/>
-        <line num="73" count="3" type="stmt"/>
-        <line num="74" count="3" type="stmt"/>
-        <line num="76" count="3" type="stmt"/>
-        <line num="77" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="79" count="0" type="stmt"/>
-        <line num="80" count="0" type="stmt"/>
-        <line num="81" count="0" type="stmt"/>
-        <line num="82" count="0" type="stmt"/>
-        <line num="84" count="0" type="stmt"/>
-        <line num="88" count="3" type="stmt"/>
+        <line num="81" count="3" type="stmt"/>
+        <line num="82" count="3" type="stmt"/>
+        <line num="83" count="3" type="stmt"/>
+        <line num="84" count="3" type="stmt"/>
+        <line num="86" count="3" type="stmt"/>
+        <line num="87" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="89" count="0" type="stmt"/>
-        <line num="93" count="0" type="stmt"/>
-        <line num="96" count="3" type="stmt"/>
+        <line num="90" count="0" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
+        <line num="92" count="0" type="stmt"/>
+        <line num="94" count="0" type="stmt"/>
         <line num="98" count="3" type="stmt"/>
-        <line num="99" count="3" type="stmt"/>
+        <line num="99" count="0" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="107" count="3" type="stmt"/>
+        <line num="108" count="0" type="stmt"/>
+        <line num="109" count="0" type="stmt"/>
+        <line num="110" count="0" type="stmt"/>
+        <line num="111" count="0" type="stmt"/>
+        <line num="112" count="0" type="stmt"/>
+        <line num="116" count="3" type="stmt"/>
+        <line num="117" count="0" type="stmt"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="121" count="3" type="stmt"/>
+        <line num="123" count="3" type="stmt"/>
+        <line num="124" count="3" type="stmt"/>
       </file>
     </package>
     <package name="utils">
-      <metrics statements="49" coveredstatements="12" conditionals="18" coveredconditionals="0" methods="9" coveredmethods="0"/>
-      <file name="emailService.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\utils\emailService.js">
-        <metrics statements="9" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="2" count="1" type="stmt"/>
-        <line num="4" count="1" type="stmt"/>
-        <line num="13" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
-        <line num="21" count="0" type="stmt"/>
-        <line num="22" count="0" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="28" count="1" type="stmt"/>
-      </file>
-      <file name="notifyUser.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\utils\notifyUser.js">
+      <metrics statements="40" coveredstatements="8" conditionals="18" coveredconditionals="0" methods="8" coveredmethods="0"/>
+      <file name="notifyUser.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\utils\notifyUser.js">
         <metrics statements="20" coveredstatements="4" conditionals="16" coveredconditionals="0" methods="2" coveredmethods="0"/>
         <line num="1" count="4" type="stmt"/>
         <line num="2" count="4" type="stmt"/>
@@ -618,7 +684,7 @@
         <line num="49" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="52" count="4" type="stmt"/>
       </file>
-      <file name="socketUtils.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\utils\socketUtils.js">
+      <file name="socketUtils.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\utils\socketUtils.js">
         <metrics statements="20" coveredstatements="4" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="0"/>
         <line num="2" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
@@ -644,7 +710,7 @@
     </package>
     <package name="validationModels">
       <metrics statements="29" coveredstatements="19" conditionals="0" coveredconditionals="0" methods="5" coveredmethods="0"/>
-      <file name="validateRefuel.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\validationModels\validateRefuel.js">
+      <file name="validateRefuel.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\validationModels\validateRefuel.js">
         <metrics statements="7" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -654,7 +720,7 @@
         <line num="43" count="0" type="stmt"/>
         <line num="46" count="1" type="stmt"/>
       </file>
-      <file name="validateRestLog.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\validationModels\validateRestLog.js">
+      <file name="validateRestLog.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\validationModels\validateRestLog.js">
         <metrics statements="5" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -662,7 +728,7 @@
         <line num="31" count="0" type="stmt"/>
         <line num="34" count="1" type="stmt"/>
       </file>
-      <file name="validateTrip.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\validationModels\validateTrip.js">
+      <file name="validateTrip.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\validationModels\validateTrip.js">
         <metrics statements="6" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -671,7 +737,7 @@
         <line num="107" count="0" type="stmt"/>
         <line num="110" count="1" type="stmt"/>
       </file>
-      <file name="validateTruck.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\validationModels\validateTruck.js">
+      <file name="validateTruck.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\validationModels\validateTruck.js">
         <metrics statements="6" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -680,7 +746,7 @@
         <line num="26" count="0" type="stmt"/>
         <line num="29" count="1" type="stmt"/>
       </file>
-      <file name="validateUser.js" path="C:\varshini\TruckFleetManagement\TruckFleet-backend\validationModels\validateUser.js">
+      <file name="validateUser.js" path="C:\varshini\TruckFleetManagement\TFM_Backend\validationModels\validateUser.js">
         <metrics statements="5" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>

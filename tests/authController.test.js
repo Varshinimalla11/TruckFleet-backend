@@ -4,8 +4,13 @@ const authController = require("../controllers/authController");
 const { User } = require("../models/user");
 const { InviteToken } = require("../models/inviteToken");
 const { validateUser } = require("../validationModels/validateUser");
+const {
+  validatePasswordReset,
+} = require("../validationModels/validatePasswordReset");
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
+const { notifyUser } = require("../utils/notifyUser");
+const { sendPasswordResetEmail } = require("../utils/emailService");
 
 // Mock all external modules
 jest.mock("../models/user");
@@ -13,6 +18,14 @@ jest.mock("../models/inviteToken");
 jest.mock("../validationModels/validateUser");
 jest.mock("bcrypt");
 jest.mock("lodash");
+jest.mock("../validationModels/validatePasswordReset", () => ({
+  validateEmail: jest.fn(),
+  validatePasswordReset: jest.fn(),
+}));
+jest.mock("../utils/emailService", () => ({
+  sendPasswordResetEmail: jest.fn(),
+}));
+jest.mock("../utils/notifyUser", () => jest.fn());
 
 describe("authController", () => {
   let req, res, statusMock, sendMock;
@@ -434,6 +447,180 @@ describe("authController", () => {
 
       expect(statusMock).toHaveBeenCalledWith(500);
       expect(sendMock).toHaveBeenCalledWith({ message: "Server error" });
+    });
+  });
+
+  describe("forgotPassword", () => {
+    let validateEmail, sendPasswordResetEmail, notifyUser;
+    beforeEach(() => {
+      validateEmail =
+        require("../validationModels/validatePasswordReset").validateEmail;
+      sendPasswordResetEmail =
+        require("../utils/emailService").sendPasswordResetEmail;
+      notifyUser = require("../utils/notifyUser");
+      req = { body: { email: "test@example.com" } };
+      res = { status: jest.fn(() => res), send: jest.fn() };
+      jest.clearAllMocks();
+    });
+
+    test("returns 400 if email validation fails", async () => {
+      validateEmail.mockReturnValue({
+        error: { details: [{ message: "Invalid email" }] },
+      });
+      await authController.forgotPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: "Invalid email" });
+    });
+
+    test("returns 200 if user not found", async () => {
+      validateEmail.mockReturnValue({});
+      User.findOne.mockResolvedValue(null);
+      await authController.forgotPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        message: expect.stringContaining("password reset link has been sent"),
+      });
+    });
+
+    test("returns 200 if email send fails", async () => {
+      validateEmail.mockReturnValue({});
+      User.findOne.mockResolvedValue({
+        email: "test@example.com",
+        save: jest.fn(),
+      });
+      sendPasswordResetEmail.mockRejectedValue(new Error("fail"));
+      notifyUser.mockResolvedValue();
+      await authController.forgotPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        message: expect.stringContaining("password reset link has been sent"),
+      });
+    });
+
+    test("returns 200 if email sent", async () => {
+      validateEmail.mockReturnValue({});
+      User.findOne.mockResolvedValue({
+        email: "test@example.com",
+        save: jest.fn(),
+      });
+      sendPasswordResetEmail.mockResolvedValue();
+      notifyUser.mockResolvedValue();
+      await authController.forgotPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        message: expect.stringContaining("password reset link has been sent"),
+      });
+    });
+
+    test("returns 500 on error", async () => {
+      validateEmail.mockReturnValue({});
+      User.findOne.mockImplementation(() => {
+        throw new Error("fail");
+      });
+      await authController.forgotPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: "Server error" });
+    });
+  });
+
+  describe("resetPassword", () => {
+    let validatePasswordReset, notifyUser;
+    beforeEach(() => {
+      validatePasswordReset =
+        require("../validationModels/validatePasswordReset").validatePasswordReset;
+      notifyUser = require("../utils/notifyUser");
+      req = { body: { token: "token", newPassword: "newpass" } };
+      res = { status: jest.fn(() => res), send: jest.fn() };
+      jest.clearAllMocks();
+    });
+
+    test("returns 400 if validation fails", async () => {
+      validatePasswordReset.mockReturnValue({
+        error: { details: [{ message: "Invalid" }] },
+      });
+      await authController.resetPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: "Invalid" });
+    });
+
+    test("returns 400 if token invalid or expired", async () => {
+      validatePasswordReset.mockReturnValue({});
+      User.findOne.mockResolvedValue(null);
+      await authController.resetPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        message: "Invalid or expired reset token",
+      });
+    });
+
+    test("returns 400 if new password is same as old", async () => {
+      validatePasswordReset.mockReturnValue({});
+      User.findOne.mockResolvedValue({ password: "oldpass" });
+      require("bcrypt").compare.mockResolvedValue(true);
+      await authController.resetPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        message: expect.stringContaining("cannot be the same"),
+      });
+    });
+
+    test("resets password and notifies user", async () => {
+      validatePasswordReset.mockReturnValue({});
+      User.findOne.mockResolvedValue({ password: "oldpass", save: jest.fn() });
+      require("bcrypt").compare.mockResolvedValue(false);
+      notifyUser.mockResolvedValue();
+      await authController.resetPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        message: "Password reset successfully",
+      });
+    });
+
+    test("returns 500 on error", async () => {
+      validatePasswordReset.mockReturnValue({});
+      User.findOne.mockImplementation(() => {
+        throw new Error("fail");
+      });
+      await authController.resetPassword(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: "Server error" });
+    });
+  });
+
+  describe("validateResetToken", () => {
+    beforeEach(() => {
+      req = { params: { token: "token" } };
+      res = { status: jest.fn(() => res), send: jest.fn() };
+      jest.clearAllMocks();
+    });
+
+    test("returns 400 if token invalid or expired", async () => {
+      User.findOne.mockResolvedValue(null);
+      await authController.validateResetToken(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({
+        valid: false,
+        message: expect.stringContaining("Invalid or expired"),
+      });
+    });
+
+    test("returns 200 if token valid", async () => {
+      User.findOne.mockResolvedValue({});
+      await authController.validateResetToken(req, res);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.send).toHaveBeenCalledWith({
+        valid: true,
+        message: "Token is valid",
+      });
+    });
+
+    test("returns 500 on error", async () => {
+      User.findOne.mockImplementation(() => {
+        throw new Error("fail");
+      });
+      await authController.validateResetToken(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: "Server error" });
     });
   });
 });

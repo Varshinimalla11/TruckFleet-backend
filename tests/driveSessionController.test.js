@@ -2,7 +2,8 @@
 
 jest.mock("config", () => ({
   get: (key) => {
-    if (key === "jwtSecret" || key === "jwtPrivateKey") return "test_jwt_secret";
+    if (key === "jwtSecret" || key === "jwtPrivateKey")
+      return "test_jwt_secret";
     if (key === "email.user") return "test@example.com";
     if (key === "email.pass") return "testpass";
     if (key === "socket.corsOrigin") return "http://localhost";
@@ -77,211 +78,54 @@ describe("DriveSessionController", () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.send).toHaveBeenCalledWith("Session already ended");
     });
-it("should end session and start rest successfully", async () => {
-  req.params.session_id = "sess1";
-  req.body.fuel_left = 50;
+    it("should end session and start rest successfully", async () => {
+      req.params.session_id = "sess1";
+      req.body.fuel_left = 50;
 
-  const mockSessionSave = jest.fn().mockResolvedValue(true);
-  const mockRestLogSave = jest.fn().mockResolvedValue(true);
+      const mockSessionSave = jest.fn().mockResolvedValue(true);
+      const mockRestLogSave = jest.fn().mockResolvedValue(true);
 
-  const mockSession = {
-    _id: "sess1",
-    trip_id: "trip1",
-    start_time: new Date(Date.now() - 3600000),
-    end_time: null,
-    save: mockSessionSave,
-  };
-  Object.setPrototypeOf(mockSession, DriveSession.prototype);
-  DriveSession.findById.mockResolvedValue(mockSession);
+      const mockSession = {
+        _id: "sess1",
+        trip_id: "trip1",
+        start_time: new Date(Date.now() - 3600000),
+        end_time: null,
+        save: mockSessionSave,
+      };
+      Object.setPrototypeOf(mockSession, DriveSession.prototype);
+      DriveSession.findById.mockResolvedValue(mockSession);
 
-  const mockTrip = {
-    _id: "trip1",
-    truck_id: "truck1",
-    driver_id: "driver123",
-    owner_id: "owner1",
-    total_km: 1000,
-    fuel_start: 100,
-    driver_snapshot: { name: "Driver Name" },
-  };
+      const mockTrip = {
+        _id: "trip1",
+        truck_id: "truck1",
+        driver_id: "driver123",
+        owner_id: "owner1",
+        total_km: 1000,
+        fuel_start: 100,
+        driver_snapshot: { name: "Driver Name" },
+      };
 
-  const mockTruck = {
-    _id: "truck1",
-    mileage_factor: 5,
-  };
+      const mockTruck = {
+        _id: "truck1",
+        mileage_factor: 5,
+      };
 
-  RestLog.mockImplementation(() => ({ save: mockRestLogSave }));
-  Trip.findById.mockResolvedValue(mockTrip);
-  Truck.findById.mockResolvedValue(mockTruck);
-  RestLog.findOne.mockResolvedValue(null);
-  DriveSession.findOne.mockResolvedValue(null);
-  RefuelEvent.find.mockResolvedValue([]);
-  DriveSession.aggregate.mockResolvedValue([]);
+      RestLog.mockImplementation(() => ({ save: mockRestLogSave }));
+      Trip.findById.mockResolvedValue(mockTrip);
+      Truck.findById.mockResolvedValue(mockTruck);
+      RestLog.findOne.mockResolvedValue(null);
+      DriveSession.findOne.mockResolvedValue(null);
+      RefuelEvent.find.mockResolvedValue([]);
+      DriveSession.aggregate.mockResolvedValue([]);
 
-  notifyUser.mockResolvedValue();
+      notifyUser.mockResolvedValue();
 
-  await driveSessionController.endDriveSessionAndStartRest(req, res);
+      await driveSessionController.endDriveSessionAndStartRest(req, res);
 
-expect(res.send).toHaveBeenCalledWith({ message: "Internal Server Error" });
-
-});
-
-//   const mockSessionSave = jest.fn().mockResolvedValue(true);
-//   const mockRestLogSave = jest.fn().mockResolvedValue(true);
-
-//   const mockSession = {
-//     _id: 'sess1',
-//     trip_id: 'trip1',
-//     start_time: new Date(Date.now() - 3600000),
-//     end_time: null,
-//     save: mockSessionSave,
-//   };
-
-//   const mockRestLog = { save: mockRestLogSave };
-
-//   RestLog.mockImplementation(() => mockRestLog);
-
-//   DriveSession.findById.mockResolvedValue(mockSession);
-//   // other mocks...
-
-//   await driveSessionController.endDriveSessionAndStartRest(req, res);
-
-//   expect(mockSessionSave).toHaveBeenCalled();
-//   expect(mockRestLogSave).toHaveBeenCalled();
-// });
-
-// it("should end session and start rest successfully", async () => {
-//   req.params.session_id = "sess1";
-//   req.body.fuel_left = 50;
-
-//   // Create jest.fn spies
-//   const mockSessionSave = jest.fn().mockResolvedValue(true);
-//   const mockRestLogSave = jest.fn().mockResolvedValue(true);
-
-//   // Mock session instance with save spy
-//   const mockSession = {
-//     _id: "sess1",
-//     trip_id: "trip1",
-//     start_time: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
-//     end_time: null,
-//     fuel_used: null,
-//     km_covered: null,
-//     fuel_left: null,
-//     duration_hours: null,
-//     save: mockSessionSave,
-//   };
-
-//   // Mock trip returned by Trip.findById
-//   const mockTrip = {
-//     _id: "trip1",
-//     truck_id: "truck1",
-//     driver_id: "driver123",
-//     owner_id: "owner1",
-//     total_km: 1000,
-//     fuel_start: 100,
-//     driver_snapshot: { name: "Driver Name" },
-//   };
-
-//   // Mock truck returned by Truck.findById
-//   const mockTruck = {
-//     _id: "truck1",
-//     mileage_factor: 5,
-//   };
-
-//   // Mock RestLog constructor to return an instance with save spy
-//   const mockRestLogInstance = { save: mockRestLogSave };
-//   RestLog.mockImplementation(() => mockRestLogInstance);
-
-//   // Setup all necessary mocks
-//   DriveSession.findById.mockResolvedValue(mockSession);
-//   Trip.findById.mockResolvedValue(mockTrip);
-//   Truck.findById.mockResolvedValue(mockTruck);
-//   RestLog.findOne.mockResolvedValue(null);
-//   DriveSession.findOne.mockResolvedValue(null);
-//   RefuelEvent.find.mockResolvedValue([]);
-//   DriveSession.aggregate.mockResolvedValue([]);
-//   notifyUser.mockResolvedValue();
-
-//   // Call controller and wait for promise resolution
-//   await driveSessionController.endDriveSessionAndStartRest(req, res);
-
-//   // Now expect exactly the spies to have been called
-//   expect(mockSessionSave).toHaveBeenCalled();
-//   expect(mockRestLogSave).toHaveBeenCalled();
-
-//   // notifyUser should be called twice: driver and owner
-//   expect(notifyUser).toHaveBeenCalledTimes(2);
-
-//   // Response should have been sent correctly
-//   expect(res.send).toHaveBeenCalledWith(
-//     expect.objectContaining({
-//       message: expect.any(String),
-//       session: expect.any(Object),
-//       restLog: expect.any(Object),
-//     })
-//   );
-// });
-
-    // it("should end session and start rest successfully", async () => {
-    //   req.params.session_id = "sess1";
-    //   req.body.fuel_left = 50;
-
-    //   const mockSessionSave = jest.fn().mockResolvedValue(true);
-    //   const mockRestLogSave = jest.fn().mockResolvedValue(true);
-
-    //   const mockSession = {
-    //     _id: "sess1",
-    //     trip_id: "trip1",
-    //     start_time: new Date(Date.now() - 60 * 60 * 1000), // one hour ago
-    //     end_time: null,
-    //     fuel_used: null,
-    //     km_covered: null,
-    //     fuel_left: null,
-    //     duration_hours: null,
-    //     save: mockSessionSave,
-    //   };
-
-    //   const mockTrip = {
-    //     _id: "trip1",
-    //     truck_id: "truck1",
-    //     driver_id: "driver123",
-    //     owner_id: "owner1",
-    //     total_km: 1000,
-    //     fuel_start: 100,
-    //     driver_snapshot: { name: "Driver Name" },
-    //   };
-
-    //   const mockTruck = {
-    //     _id: "truck1",
-    //     mileage_factor: 5,
-    //   };
-
-    //   // Mock the RestLog constructor to return our mock with save spy
-    //   RestLog.mockImplementation(() => ({
-    //     save: mockRestLogSave,
-    //   }));
-
-    //   DriveSession.findById.mockResolvedValue(mockSession);
-    //   Trip.findById.mockResolvedValue(mockTrip);
-    //   Truck.findById.mockResolvedValue(mockTruck);
-    //   RestLog.findOne.mockResolvedValue(null);
-    //   DriveSession.findOne.mockResolvedValue(null);
-    //   RefuelEvent.find.mockResolvedValue([]);
-    //   DriveSession.aggregate.mockResolvedValue([]);
-    //   notifyUser.mockResolvedValue();
-
-    //   await driveSessionController.endDriveSessionAndStartRest(req, res);
-
-    //   expect(mockSessionSave).toHaveBeenCalled();
-    //   expect(mockRestLogSave).toHaveBeenCalled();
-    //   expect(notifyUser).toHaveBeenCalledTimes(2);
-    //   expect(res.send).toHaveBeenCalledWith(
-    //     expect.objectContaining({
-    //       message: expect.any(String),
-    //       session: expect.any(Object),
-    //       restLog: expect.any(Object),
-    //     })
-    //   );
-    // });
+      expect(res.send).toHaveBeenCalledWith({
+        message: "Internal Server Error",
+      });
+    });
   });
 
   describe("getSessionsByTrip", () => {
@@ -331,7 +175,11 @@ expect(res.send).toHaveBeenCalledWith({ message: "Internal Server Error" });
       req.user._id = "owner1";
       req.user.role = "owner";
 
-      const mockTrip = { _id: "trip1", driver_id: "driver123", owner_id: "owner1" };
+      const mockTrip = {
+        _id: "trip1",
+        driver_id: "driver123",
+        owner_id: "owner1",
+      };
       const mockSessions = [{ _id: "sess1" }, { _id: "sess2" }];
 
       Trip.findById.mockResolvedValue(mockTrip);
@@ -341,6 +189,85 @@ expect(res.send).toHaveBeenCalledWith({ message: "Internal Server Error" });
 
       expect(DriveSession.find).toHaveBeenCalledWith({ trip_id: "trip1" });
       expect(res.send).toHaveBeenCalledWith(mockSessions);
+    });
+  });
+});
+
+describe("driveSessionController full coverage", () => {
+  let req, res;
+  beforeEach(() => {
+    req = { body: {}, params: {}, user: { _id: "driverId", role: "driver" } };
+    res = { status: jest.fn(() => res), send: jest.fn() };
+    jest.clearAllMocks();
+  });
+
+  describe("endDriveSessionAndStartRest", () => {
+    test("returns 404 if session not found", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { session_id: "sid" };
+      const DriveSession = require("../models/driveSession");
+      DriveSession.findById = jest.fn().mockResolvedValue(null);
+      await controller.endDriveSessionAndStartRest(req, res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith("Drive session not found");
+    });
+    test("returns 400 if session already ended", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { session_id: "sid" };
+      const DriveSession = require("../models/driveSession");
+      DriveSession.findById = jest
+        .fn()
+        .mockResolvedValue({ end_time: new Date() });
+      await controller.endDriveSessionAndStartRest(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith("Session already ended");
+    });
+    test("returns 500 on error", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { session_id: "sid" };
+      const DriveSession = require("../models/driveSession");
+      DriveSession.findById = jest.fn(() => {
+        throw new Error("fail");
+      });
+      await controller.endDriveSessionAndStartRest(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({
+        message: "Internal Server Error",
+      });
+    });
+    // Add more edge cases as needed
+  });
+
+  describe("getSessionsByTrip", () => {
+    test("returns 404 if trip not found", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { tripId: "tid" };
+      const Trip = require("../models/trip");
+      Trip.findById = jest.fn().mockResolvedValue(null);
+      await controller.getSessionsByTrip(req, res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith("Trip not found");
+    });
+    test("returns 403 if driver not authorized", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { tripId: "tid" };
+      req.user = { _id: "driverId", role: "driver" };
+      const Trip = require("../models/trip");
+      Trip.findById = jest.fn().mockResolvedValue({ driver_id: "otherId" });
+      await controller.getSessionsByTrip(req, res);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.send).toHaveBeenCalledWith("Access denied");
+    });
+    test("returns sessions on success", async () => {
+      const controller = require("../controllers/driveSessionController");
+      req.params = { tripId: "tid" };
+      req.user = { _id: "driverId", role: "driver" };
+      const Trip = require("../models/trip");
+      Trip.findById = jest.fn().mockResolvedValue({ driver_id: "driverId" });
+      const DriveSession = require("../models/driveSession");
+      DriveSession.find = jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]);
+      await controller.getSessionsByTrip(req, res);
+      expect(res.send).toHaveBeenCalledWith([{ id: 1 }, { id: 2 }]);
     });
   });
 });
