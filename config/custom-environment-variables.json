@@ -1,5 +1,6 @@
 {
   "jwtPrivateKey": "TFM_jwtPrivateKey",
+  "env": "NODE_ENV",
   "email": {
     "user": "EMAIL_USER",
     "pass": "EMAIL_PASS"

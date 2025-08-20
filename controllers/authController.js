@@ -2,13 +2,143 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const config = require("config");
+
 const { User } = require("../models/user");
-const { validateUser } = require("../validationModels/validateUser");
+const { OTP } = require("../models/otp");
 const { InviteToken } = require("../models/inviteToken");
-const {validatePasswordReset,validateEmail} = require("../validationModels/validatePasswordReset");
-const { sendPasswordResetEmail } = require("../utils/emailService");
+const { EmailVerification } = require("../models/emailVerification");
+
+const { validateUser } = require("../validationModels/validateUser");
+const { validateOTP } = require("../validationModels/validateOtp");
+const {
+  validatePasswordReset,
+  validateEmail,
+} = require("../validationModels/validatePasswordReset");
+
+const {
+  sendPasswordResetEmail,
+  sendOTPEmail,
+} = require("../utils/emailService");
 const notifyUser = require("../utils/notifyUser");
+
 const _ = require("lodash");
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const generateVerificationToken = (email) => {
+  return jwt.sign(
+    {
+      email: email.toLowerCase(),
+      purpose: "email_verification",
+    },
+    config.get("jwtPrivateKey"),
+    { expiresIn: "30m" } // 30 minutes expiry
+  );
+};
+
+exports.sendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).send({ message: "Email is required" });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).send({ message: "Email is already registered" });
+    }
+
+    // Generate OTP
+    const otpCode = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    // Delete any existing OTP for this email
+    await OTP.deleteMany({ email: email.toLowerCase() });
+
+    // Save new OTP
+    const otpRecord = new OTP({
+      email: email.toLowerCase(),
+      otp: otpCode,
+      expiresAt,
+    });
+
+    await otpRecord.save();
+
+    try {
+      await sendOTPEmail(email, otpCode);
+      res.status(200).send({
+        message: "OTP sent to email",
+
+        otp: config.get("env") === "development" ? otpCode : undefined,
+      });
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // Clean up OTP record if email fails
+      await OTP.deleteOne({ email: email.toLowerCase(), otp: otpCode });
+      res.status(500).send({ message: "Failed to send OTP email" });
+    }
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { error } = validateOTP(req.body);
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
+    const { email, otp } = req.body;
+
+    // Find the OTP record
+    const otpRecord = await OTP.findOne({
+      email: email.toLowerCase(),
+      otp,
+    });
+
+    if (!otpRecord) {
+      return res.status(400).send({ message: "Invalid OTP" });
+    }
+
+    // Check if OTP has expired
+    if (otpRecord.expiresAt < Date.now()) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).send({ message: "OTP has expired" });
+    }
+
+    // Delete the used OTP
+    await OTP.deleteOne({ _id: otpRecord._id });
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (user) {
+      user.emailVerified = true;
+      await user.save();
+    } else {
+      // Save verified email with 30-min expiry for registration
+      await EmailVerification.findOneAndUpdate(
+        { email: email.toLowerCase() },
+        {
+          verified: true,
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
+        },
+        { upsert: true }
+      );
+    }
+
+    res.status(200).send({
+      message: "OTP verified successfully",
+      verified: true,
+    });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+};
 
 exports.register = async (req, res) => {
   const { error } = validateUser(req.body);
@@ -27,16 +157,29 @@ exports.register = async (req, res) => {
     }
   }
 
+  // Check for verified email before registration
+  const emailVerification = await EmailVerification.findOne({
+    email: req.body.email.toLowerCase(),
+    verified: true,
+    expiresAt: { $gt: Date.now() },
+  });
+
+  if (!emailVerification) {
+    return res.status(403).send({
+      message: "Please verify your email with OTP before registering.",
+    });
+  }
+
   const allowedFields = ["name", "email", "phone", "password"];
-  // if (req.body.role === "driver") {
-  //   allowedFields.push("aadhar_number", "license_number", "ownedBy");
-  // }
+
   const filteredData = _.pick(req.body, allowedFields);
   filteredData.role = "owner";
+  filteredData.emailVerified = true;
 
   user = new User(filteredData);
   await user.save();
 
+  await EmailVerification.deleteOne({ email: req.body.email.toLowerCase() });
   const token = user.generateAuthToken();
 
   res.send({ token });
@@ -47,6 +190,12 @@ exports.login = async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) return res.status(400).send("Invalid email or password.");
+
+  if (user.role === "owner" && !user.emailVerified) {
+    return res.status(403).send({
+      message: "Email not verified. Please complete the verification process.",
+    });
+  }
 
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) return res.status(400).send("Invalid email or password.");
@@ -106,6 +255,7 @@ exports.registerDriver = async (req, res) => {
       ownedBy: tokenDoc.owner,
       aadhar_number,
       license_number,
+      emailVerified: true,
     });
 
     await user.save();
@@ -151,15 +301,16 @@ exports.getAllDrivers = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { error } = validateEmail(req.body);
-    if (error) return res.status(400).send({ message: error.details[0].message });
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
 
     const { email } = req.body;
-    
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       // For security, don't reveal if email exists or not
-      return res.status(200).send({ 
-        message: "If the email exists, a password reset link has been sent"
+      return res.status(200).send({
+        message: "If the email exists, a password reset link has been sent",
       });
     }
 
@@ -175,29 +326,32 @@ exports.forgotPassword = async (req, res) => {
     // Send email
     try {
       await sendPasswordResetEmail(user.email, resetToken);
-      
-      // Notify user about email sent
-      await notifyUser(user._id, "Password reset email sent to your email address", {
-        type: "info",
-        title: "Password Reset",
-        persist: true
-      });
 
+      // // Notify user about email sent
+      // await notifyUser(
+      //   user._id,
+      //   "Password reset email sent to your email address",
+      //   {
+      //     type: "info",
+      //     title: "Password Reset",
+      //     persist: true,
+      //   }
+      // );
     } catch (emailError) {
       console.error("Email sending failed:", emailError);
       // Remove the token if email fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
-      
-       return res.status(200).send({ 
-        message: "If the email exists, a password reset link has been sent"
-      });    }
 
-    res.status(200).send({ 
-      message: "If the email exists, a password reset link has been sent"
+      return res.status(200).send({
+        message: "If the email exists, a password reset link has been sent",
+      });
+    }
+
+    res.status(200).send({
+      message: "If the email exists, a password reset link has been sent",
     });
-
   } catch (error) {
     console.error("Forgot password error:", error);
     res.status(500).send({ message: "Server error" });
@@ -207,26 +361,27 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { error } = validatePasswordReset(req.body);
-    if (error) return res.status(400).send({ message: error.details[0].message });
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
 
     const { token, newPassword } = req.body;
 
     // Find user with valid reset token
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).send({ 
-        message: "Invalid or expired reset token" 
+      return res.status(400).send({
+        message: "Invalid or expired reset token",
       });
     }
-// ✅ Check if new password is the same as old password
+    // ✅ Check if new password is the same as old password
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
-      return res.status(400).send({ 
-        message: "New password cannot be the same as your current password" 
+      return res.status(400).send({
+        message: "New password cannot be the same as your current password",
       });
     }
     // Update password
@@ -239,13 +394,12 @@ exports.resetPassword = async (req, res) => {
     await notifyUser(user._id, "Your password has been reset successfully", {
       type: "success",
       title: "Password Reset",
-      persist: true
+      persist: true,
     });
 
-    res.status(200).send({ 
-      message: "Password reset successfully" 
+    res.status(200).send({
+      message: "Password reset successfully",
     });
-
   } catch (error) {
     console.error("Reset password error:", error);
     res.status(500).send({ message: "Server error" });
@@ -258,21 +412,20 @@ exports.validateResetToken = async (req, res) => {
 
     const user = await User.findOne({
       resetPasswordToken: token,
-      resetPasswordExpires: { $gt: Date.now() }
+      resetPasswordExpires: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).send({ 
-        valid: false, 
-        message: "Invalid or expired reset token" 
+      return res.status(400).send({
+        valid: false,
+        message: "Invalid or expired reset token",
       });
     }
 
-    res.status(200).send({ 
-      valid: true, 
-      message: "Token is valid" 
+    res.status(200).send({
+      valid: true,
+      message: "Token is valid",
     });
-
   } catch (error) {
     console.error("Validate token error:", error);
     res.status(500).send({ message: "Server error" });

@@ -9,16 +9,16 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail(to, subject, text, html=null) {
+async function sendEmail(to, subject, text, html = null) {
   const mailOptions = {
     from: config.get("email.user"),
     to,
     subject,
     text,
-    html: html || text, 
+    html: html || text,
   };
 
-   try {
+  try {
     await transporter.sendMail(mailOptions);
     console.log(`✅ Email sent to ${to}`);
     return true;
@@ -31,7 +31,7 @@ async function sendPasswordResetEmail(email, resetToken) {
   const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
   const subject = "Password Reset Request - TFM";
   const text = `You requested to reset your password. Use this token: ${resetToken}\nOr click: ${resetLink}`;
-  
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #333;">Password Reset Request</h2>
@@ -48,4 +48,24 @@ async function sendPasswordResetEmail(email, resetToken) {
 
   return await sendEmail(email, subject, text, html);
 }
-module.exports = {sendEmail, sendPasswordResetEmail};
+
+async function sendOTPEmail(email, otp) {
+  const subject = "Email Verification - TFM";
+  const text = `Your verification code is: ${otp}. This code will expire in 10 minutes.`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #333;">Email Verification</h2>
+      <p>Thank you for registering with TFM. Use the verification code below to complete your registration:</p>
+      <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+        <h1 style="margin: 0; color: #333; letter-spacing: 5px;">${otp}</h1>
+      </div>
+      <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
+      <p style="color: #666; font-size: 14px;">If you didn't request this, please ignore this email.</p>
+    </div>
+  `;
+
+  return await sendEmail(email, subject, text, html);
+}
+
+module.exports = { sendEmail, sendPasswordResetEmail, sendOTPEmail };

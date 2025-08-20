@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
 const auth = require("../middleware/auth");
-const {validateEmail, validatePassword} = require("../validationModels/validatePasswordReset");
+const {
+  validateEmail,
+  validatePassword,
+} = require("../validationModels/validatePasswordReset");
 //const admin = require("../middleware/authorizeRole");
 
 /**
@@ -11,6 +14,66 @@ const {validateEmail, validatePassword} = require("../validationModels/validateP
  *   name: Auth
  *   description: Authentication & Login API
  */
+
+/**
+ * @swagger
+ * /api/auth/send-otp:
+ *   post:
+ *     summary: Send OTP for email verification
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: owner@example.com
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       400:
+ *         description: Email is required or already registered
+ *       500:
+ *         description: Server error
+ */
+router.post("/send-otp", authController.sendOTP);
+
+/**
+ * @swagger
+ * /api/auth/verify-otp:
+ *   post:
+ *     summary: Verify OTP for email verification
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: owner@example.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *       400:
+ *         description: Invalid OTP or email
+ *       500:
+ *         description: Server error
+ */
+router.post("/verify-otp", authController.verifyOTP);
 
 /**
  * @swagger
@@ -310,7 +373,4 @@ router.post("/reset-password", authController.resetPassword);
  */
 router.get("/validate-reset-token/:token", authController.validateResetToken);
 
-
-
 module.exports = router;
-
