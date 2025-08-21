@@ -14,7 +14,7 @@ exports.getStats = async (req, res) => {
     if (req.user.role === "owner") {
       truckFilter.owner_id = req.user._id;
       tripFilter.owner_id = req.user._id;
-      driverFilter.ownedBy = req.user._id; 
+      driverFilter.ownedBy = req.user._id;
     } else if (req.user.role === "driver") {
       truckFilter = {}; // no trucks for drivers
       tripFilter = { ...tripFilter, driver_id: req.user._id };
@@ -27,7 +27,10 @@ exports.getStats = async (req, res) => {
     // Added for test expectation
     await DriveSession.countDocuments();
 
-    const ongoingTrips = await Trip.countDocuments({ ...tripFilter, status: "ongoing" });
+    const ongoingTrips = await Trip.countDocuments({
+      ...tripFilter,
+      status: "ongoing",
+    });
 
     res.json({
       totalTrucks,
@@ -55,10 +58,9 @@ exports.getRecentTrips = async (req, res) => {
     .limit(5)
     .populate("truck_id")
     .populate("driver_id")
-    .then(trips => res.json(trips))
+    .then((trips) => res.json(trips))
     .catch(() => res.status(500).json({ message: "Internal Server Error" }));
 };
-
 
 // GET recent drive sessions
 exports.getRecentDriveSessions = async (req, res) => {
@@ -71,14 +73,14 @@ exports.getRecentDriveSessions = async (req, res) => {
 
   Trip.find(tripFilter)
     .select("_id")
-    .then(trips => {
-      const tripIds = trips.map(trip => trip._id);
+    .then((trips) => {
+      const tripIds = trips.map((trip) => trip._id);
       // Use chained mocks for DriveSession.find
       return DriveSession.find({ trip_id: { $in: tripIds } })
         .sort({ start_time: -1 })
         .limit(5)
-        .then(sessions => res.json(sessions));
+        .populate("trip_id")
+        .then((sessions) => res.json(sessions));
     })
     .catch(() => res.status(500).json({ message: "Internal Server Error" }));
 };
-

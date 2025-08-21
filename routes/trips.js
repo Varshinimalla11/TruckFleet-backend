@@ -88,17 +88,6 @@ router.post("/", [auth, ownerOnly], tripController.createTrip);
  *     parameters:
  *       - in: query
  *         name: status
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - fuel_end
- *             properties:
- *               fuel_end:
- *                 type: number
  *         schema:
  *           type: string
  *           enum: [scheduled, ongoing, completed, cancelled]

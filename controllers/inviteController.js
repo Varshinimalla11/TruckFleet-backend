@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const { InviteToken } = require("../models/inviteToken");
-const sendEmail = require("../utils/emailService");
+const { sendEmail } = require("../utils/emailService");
 
 exports.sendInviteToken = async (req, res) => {
   try {

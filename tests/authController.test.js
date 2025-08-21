@@ -26,6 +26,14 @@ jest.mock("../utils/emailService", () => ({
   sendPasswordResetEmail: jest.fn(),
 }));
 jest.mock("../utils/notifyUser", () => jest.fn());
+jest.mock("../models/emailVerification");
+jest.mock("config", () => ({
+  get: jest.fn((key) => {
+    if (key === "env") return "test";
+    if (key === "jwtPrivateKey") return "testkey";
+    return undefined;
+  }),
+}));
 
 describe("authController", () => {
   let req, res, statusMock, sendMock;
@@ -53,9 +61,7 @@ describe("authController", () => {
       validateUser.mockReturnValue({
         error: { details: [{ message: "Invalid input" }] },
       });
-
       await authController.register(req, res);
-
       expect(statusMock).toHaveBeenCalledWith(400);
       expect(sendMock).toHaveBeenCalledWith({ message: "Invalid input" });
     });
@@ -66,9 +72,8 @@ describe("authController", () => {
         if (query.email === req.body.email) return {};
         return null;
       });
-
+      // EmailVerification should be found for registration, but this test is for email already registered
       await authController.register(req, res);
-
       expect(statusMock).toHaveBeenCalledWith(409);
       expect(sendMock).toHaveBeenCalledWith({
         message: "Email is already registered",
@@ -80,36 +85,46 @@ describe("authController", () => {
       User.findOne
         .mockResolvedValueOnce(null) // for email check
         .mockResolvedValueOnce({ phone: req.body.phone }); // for phone check
-
+      // EmailVerification should be found for registration, but this test is for phone already registered
       await authController.register(req, res);
-
       expect(statusMock).toHaveBeenCalledWith(409);
       expect(sendMock).toHaveBeenCalledWith({
         message: "Phone number is already registered",
       });
     });
 
+    test("returns 403 if email not verified", async () => {
+      validateUser.mockReturnValue({});
+      User.findOne.mockResolvedValue(null);
+      const { EmailVerification } = require("../models/emailVerification");
+      EmailVerification.findOne = jest.fn().mockResolvedValue(null);
+      await authController.register(req, res);
+      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(sendMock).toHaveBeenCalledWith({
+        message: expect.stringContaining("verify your email"),
+      });
+    });
+
     test("successful registration returns token", async () => {
       validateUser.mockReturnValue({});
       User.findOne.mockResolvedValue(null);
-
+      const { EmailVerification } = require("../models/emailVerification");
+      EmailVerification.findOne = jest
+        .fn()
+        .mockResolvedValue({ verified: true, expiresAt: Date.now() + 10000 });
       _.pick.mockReturnValue({
         name: req.body.name,
         email: req.body.email,
         phone: req.body.phone,
         password: req.body.password,
       });
-
-      const saveMock = jest.fn();
+      const saveMock = jest.fn().mockResolvedValue(true);
       const generateAuthTokenMock = jest.fn(() => "fake.jwt.token");
-
       User.mockImplementation(() => ({
         save: saveMock,
         generateAuthToken: generateAuthTokenMock,
       }));
-
       await authController.register(req, res);
-
       expect(saveMock).toHaveBeenCalled();
       expect(generateAuthTokenMock).toHaveBeenCalled();
       expect(sendMock).toHaveBeenCalledWith({ token: "fake.jwt.token" });
@@ -119,26 +134,41 @@ describe("authController", () => {
       req.body.phone = undefined;
       validateUser.mockReturnValue({});
       User.findOne.mockResolvedValue(null);
-
+      const { EmailVerification } = require("../models/emailVerification");
+      EmailVerification.findOne = jest
+        .fn()
+        .mockResolvedValue({ verified: true, expiresAt: Date.now() + 10000 });
       _.pick.mockReturnValue({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
       });
-
       const saveMock = jest.fn();
       const generateAuthTokenMock = jest.fn(() => "fake.jwt.token");
-
       User.mockImplementation(() => ({
         save: saveMock,
         generateAuthToken: generateAuthTokenMock,
       }));
-
       await authController.register(req, res);
-
       expect(User.findOne).toHaveBeenCalledTimes(1); // only email check
       expect(saveMock).toHaveBeenCalled();
       expect(sendMock).toHaveBeenCalledWith({ token: "fake.jwt.token" });
+    });
+    test("returns 403 if owner email not verified", async () => {
+      User.findOne.mockResolvedValue({
+        password: "hashedPassword",
+        _id: "userid123",
+        name: "John",
+        email: "test@example.com",
+        role: "owner",
+        emailVerified: false,
+        generateAuthToken: () => "jwt.token",
+      });
+      await authController.login(req, res);
+      expect(statusMock).toHaveBeenCalledWith(403);
+      expect(sendMock).toHaveBeenCalledWith({
+        message: expect.stringContaining("Email not verified"),
+      });
     });
   });
 
@@ -181,6 +211,7 @@ describe("authController", () => {
         name: "John",
         email: "test@example.com",
         role: "owner",
+        emailVerified: true,
         generateAuthToken: () => "jwt.token",
       };
       User.findOne.mockResolvedValue(userObj);
