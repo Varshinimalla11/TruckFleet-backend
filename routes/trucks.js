@@ -1,10 +1,10 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const auth = require("../middleware/auth");
-const ownerOrAdminOnly = require("../middleware/ownerOrAdminOnly");
-const authorizeRole = require("../middleware/authorizeRole");
-const checkTruckOwnership = require("../middleware/checkTruckOwnership");
-const truckController = require("../controllers/truckController");
+import auth from "../middleware/auth.js";
+import ownerOrAdminOnly from "../middleware/ownerOrAdminOnly.js";
+import authorizeRole from "../middleware/authorizeRole.js";
+import checkTruckOwnership from "../middleware/checkTruckOwnership.js"
+import * as truckController from "../controllers/truckController.js";
 
 /**
  * @swagger
@@ -154,4 +154,4 @@ router.put("/:id", [auth, checkTruckOwnership], truckController.updateTruck);
 // DELETE truck
 router.delete("/:id", [auth, checkTruckOwnership], truckController.deleteTruck);
 
-module.exports = router;
+export default router;

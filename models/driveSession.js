@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const DriveSessionSchema = new mongoose.Schema({
   trip_id: {
@@ -30,4 +30,5 @@ warned_at_5min: { type: Date },
 });
 
 const DriveSession = mongoose.model("DriveSession", DriveSessionSchema);
-module.exports = DriveSession;
+
+export default DriveSession;

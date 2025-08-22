@@ -2,9 +2,11 @@
   "name": "tfm_backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "cross-env EMAIL_USER=malla.varshini03@gmail.com EMAIL_PASS=lqnndavmineqcvdq nodemon index.js",
-    "test": "jest --watchAll"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
+
   },
   "author": "",
   "license": "ISC",

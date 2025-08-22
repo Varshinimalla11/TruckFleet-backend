@@ -1,6 +1,6 @@
-const Trip = require("../models/trip");
+import Trip from "../models/trip.js";
 
-module.exports = async function (req, res, next) {
+export default async function (req, res, next) {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).send("Trip not found");
 

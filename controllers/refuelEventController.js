@@ -1,10 +1,11 @@
-const RefuelEvent = require("../models/refuelEvent");
-const Trip = require("../models/trip");
-const validateRefuelEvent = require("../validationModels/validateRefuel");
-const notifyUser = require("../utils/notifyUser");
+import RefuelEvent from "../models/refuelEvent.js";
+import Trip from "../models/trip.js";
+import refuelValidation from "../validationModels/validateRefuel.js";
+import notifyUser from "../utils/notifyUser.js";
 
-exports.logRefuel = async (req, res) => {
-  const { error } = validateRefuelEvent(req.body);
+
+export const logRefuel = async (req, res) => {
+  const { error } = refuelValidation.validateRefuelEvent(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
   const { trip_id, event_time, fuel_before, fuel_added, payment_mode } =
@@ -48,7 +49,7 @@ exports.logRefuel = async (req, res) => {
   res.status(201).send({ message: "Refuel event logged", refuelEvent });
 };
 
-exports.getRefuelLogsByTrip = async (req, res) => {
+export const getRefuelLogsByTrip = async (req, res) => {
   const { tripId } = req.params;
 
   const trip = await Trip.findById(tripId);

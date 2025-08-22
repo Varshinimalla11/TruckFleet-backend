@@ -1,5 +1,5 @@
-const Joi = require("joi");
-const mongoose = require("mongoose");
+import Joi from "joi";
+import mongoose from "mongoose";
 
 // Custom validator for ObjectId
 const objectId = Joi.string().custom((value, helpers) => {
@@ -9,4 +9,4 @@ const objectId = Joi.string().custom((value, helpers) => {
   return value;
 }, "ObjectId Validation");
 
-exports.objectId = objectId;
+export { objectId };

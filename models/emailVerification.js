@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const EmailVerificationSchema = new mongoose.Schema({
   email: {
@@ -24,4 +24,4 @@ const EmailVerification = mongoose.model(
   EmailVerificationSchema
 );
 
-exports.EmailVerification = EmailVerification;
+export {EmailVerification}

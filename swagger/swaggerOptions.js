@@ -30,4 +30,4 @@ const options = {
   apis: ["./routes/*.js"], // 🔁 add correct path to route files
 };
 
-module.exports = options;
+export default options;

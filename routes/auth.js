@@ -1,12 +1,8 @@
-const express = require("express");
+import express from "express";
+import * as authController from "../controllers/authController.js";
+import auth from "../middleware/auth.js";
+
 const router = express.Router();
-const authController = require("../controllers/authController");
-const auth = require("../middleware/auth");
-const {
-  validateEmail,
-  validatePassword,
-} = require("../validationModels/validatePasswordReset");
-//const admin = require("../middleware/authorizeRole");
 
 /**
  * @swagger
@@ -373,4 +369,4 @@ router.post("/reset-password", authController.resetPassword);
  */
 router.get("/validate-reset-token/:token", authController.validateResetToken);
 
-module.exports = router;
+export default router;

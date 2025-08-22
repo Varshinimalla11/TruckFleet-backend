@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const refuelController = require("../controllers/refuelEventController");
-const auth = require("../middleware/auth");
+import * as refuelController from "../controllers/refuelEventController.js";
+import auth from "../middleware/auth.js";
 
 /**
  * @swagger
@@ -72,4 +72,4 @@ router.post("/", auth, refuelController.logRefuel);
  */
 router.get("/:tripId", auth, refuelController.getRefuelLogsByTrip);
 
-module.exports = router;
+export default router;

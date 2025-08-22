@@ -1,6 +1,6 @@
-const { Truck } = require("../models/truck");
+import { Truck } from "../models/truck.js";
 
-module.exports = async function (req, res, next) {
+export default async function (req, res, next) {
   const truck = await Truck.findById(req.params.id);
 
   if (!truck) return res.status(404).send("Truck not found");

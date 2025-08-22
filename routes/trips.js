@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const auth = require("../middleware/auth");
-const ownerOnly = require("../middleware/ownerOrAdminOnly");
-const authorizeRole = require("../middleware/authorizeRole");
+import auth from "../middleware/auth.js";
+import ownerOnly from "../middleware/ownerOrAdminOnly.js";
+import authorizeRole from "../middleware/authorizeRole.js";
 
-const tripController = require("../controllers/tripController");
-const canStartorCompleteTrip = require("../middleware/tripAccess");
+import * as tripController from "../controllers/tripController.js";
+import canStartorCompleteTrip from "../middleware/tripAccess.js";
 
 /**
  * @swagger
@@ -88,17 +88,6 @@ router.post("/", [auth, ownerOnly], tripController.createTrip);
  *     parameters:
  *       - in: query
  *         name: status
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - fuel_end
- *             properties:
- *               fuel_end:
- *                 type: number
  *         schema:
  *           type: string
  *           enum: [scheduled, ongoing, completed, cancelled]
@@ -378,4 +367,4 @@ router.patch(
   tripController.cancelTrip
 );
 
-module.exports = router;
+export default router;

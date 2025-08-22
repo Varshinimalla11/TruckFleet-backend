@@ -1,6 +1,6 @@
-const { Notification } = require("../models/notification");
-const { emitNotification } = require("./socketUtils");
-const winston = require("winston");
+import { Notification } from "../models/notification.js";
+import { emitNotification } from "./socketUtils.js";
+import winston from "winston";
 
 async function notifyUser(userId, message, options = {}) {
   const { type = "info", title, persist = true, realTime = true } = options;
@@ -49,4 +49,4 @@ function getDefaultTitle(type) {
   return titles[type] || "Notification";
 }
 
-module.exports = notifyUser;
+export default notifyUser;

@@ -1,16 +1,16 @@
-const express = require("express");
+import express from "express";
 //const owners = require("../routes/owners");
-const auth = require("../routes/auth");
-const trucks = require("../routes/trucks");
-const trips = require("../routes/trips");
-const notifications = require("../routes/notifications");
-const inviteTokens = require("../routes/inviteTokens");
-const driveSessions = require("../routes/driveSessions");
-const restLogs = require("../routes/restLogs");
-const refuelEvents = require("../routes/refuelEvents");
-const dashboards = require("../routes/dashboards");
+import auth from "../routes/auth.js";
+import trucks from "../routes/trucks.js";
+import trips from "../routes/trips.js";
+import notifications from "../routes/notifications.js";
+import inviteTokens from "../routes/inviteTokens.js";
+import driveSessions from "../routes/driveSessions.js";
+import restLogs from "../routes/restLogs.js";
+import refuelEvents from "../routes/refuelEvents.js";
+import dashboards from "../routes/dashboards.js";
 
-module.exports = function (app) {
+export default function (app) {
   // Middleware to parse JSON bodies
   app.use(express.json());
 

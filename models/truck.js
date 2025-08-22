@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const truckSchema = new mongoose.Schema(
   {
@@ -30,5 +30,5 @@ truckSchema.index({ owner_id: 1 });
 
 const Truck = mongoose.model("Truck", truckSchema);
 
-exports.Truck = Truck;
-exports.truckSchema = truckSchema;
+
+export { Truck, truckSchema };

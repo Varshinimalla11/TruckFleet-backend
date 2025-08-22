@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const auth = require("../middleware/auth");
-const notificationController = require("../controllers/notificationController");
+import auth from "../middleware/auth.js";
+import * as notificationController from "../controllers/notificationController.js";
 
 /**
  * @swagger
@@ -126,4 +126,4 @@ router.put("/mark-all-read", auth, notificationController.markAllAsSeen);
  */
 router.delete("/:id", auth, notificationController.deleteNotification);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const restLogController = require("../controllers/restLogController");
-const auth = require("../middleware/auth");
+import * as restLogController from "../controllers/restLogController.js";
+import auth from "../middleware/auth.js";
 
 // 📌 Get all rest logs by Trip ID
 /**
@@ -58,4 +58,4 @@ router.get("/trip/:tripId", auth, restLogController.getRestLogsByTrip);
  */
 router.put("/:rest_id/end", auth, restLogController.endRestAndStartDrive);
 
-module.exports = router;
+export default router;

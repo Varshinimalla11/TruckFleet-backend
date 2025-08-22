@@ -1,6 +1,6 @@
 // validationModels/validateAuth.js
-const Joi = require("joi");
-const passwordComplexity = require("../common/validate");
+import Joi from "joi";
+import passwordComplexity from "../common/validate.js";
 
 // ✅ Validate Password Reset (token + new password)
 const validatePasswordReset = (data) => {
@@ -43,7 +43,7 @@ const validateResetToken = (data) => {
   return schema.validate(data, { abortEarly: false });
 };
 
-module.exports = {
+export default {
   validatePasswordReset,
   validateEmail,
   validateResetToken,

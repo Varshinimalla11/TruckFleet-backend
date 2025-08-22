@@ -1,6 +1,5 @@
-const Joi = require("joi");
-const mongoose = require("mongoose");
-const { objectId } = require("../common/validateObjectId");
+import Joi from "joi";
+import { objectId } from "../common/validateObjectId.js";
 
 const validateRefuelEvent = (data) => {
   const schema = Joi.object({
@@ -43,4 +42,6 @@ const validateRefuelEvent = (data) => {
   return schema.validate(data);
 };
 
-module.exports = validateRefuelEvent;
+export default {
+  validateRefuelEvent
+};

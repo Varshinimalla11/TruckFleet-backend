@@ -1,5 +1,5 @@
-const Joi = require("joi");
-const { objectId } = require("../common/validateObjectId");
+import Joi from "joi";
+import { objectId } from "../common/validateObjectId.js";
 
 function validateRestLog(restLog) {
   const schema = Joi.object({
@@ -31,4 +31,6 @@ function validateRestLog(restLog) {
   return schema.validate(restLog);
 }
 
-module.exports = validateRestLog;
+export default {
+  validateRestLog
+};

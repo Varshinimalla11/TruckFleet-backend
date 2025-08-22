@@ -1,6 +1,6 @@
-const Joi = require("joi");
-const mongoose = require("mongoose");
-const { objectId } = require("../common/validateObjectId");
+import Joi from "joi";
+import mongoose from "mongoose";
+import { objectId } from "../common/validateObjectId.js";
 
 function validateTrip(trip) {
   const schema = Joi.object({
@@ -107,4 +107,5 @@ function validateTrip(trip) {
   return schema.validate(trip);
 }
 
-exports.validateTrip = validateTrip;
+    
+export {validateTrip};

@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
-const { Truck } = require("../models/truck");
-const { validateTruck } = require("../validationModels/validateTruck");
+import mongoose from "mongoose";
+import { Truck } from "../models/truck.js";
+import {validateTruck} from "../validationModels/validateTruck.js";
 
 function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id); 
 }
 
 // POST /api/trucks
-exports.createTruck = async (req, res) => {
+export const createTruck = async (req, res) => {
   const { error } = validateTruck(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -29,7 +29,7 @@ exports.createTruck = async (req, res) => {
 
 
 // GET /api/trucks
-exports.getAllTrucks = async (req, res) => {
+export const getAllTrucks = async (req, res) => {
   try {
     if (req.user.role === "owner") {
       const trucks = await Truck.find({ owner_id: req.user._id });
@@ -44,14 +44,14 @@ exports.getAllTrucks = async (req, res) => {
     }
     res.status(403).json({ message: "Unauthorized role" });
   } catch (err) {
-    console.error(err);
+    
     res.status(500).send("Server Error");
   }
 };
 
 // GET /api/trucks/:id
 
-exports.getTruckById = async (req, res) => {
+export const getTruckById = async (req, res) => {
   const  id  = req.params.id;
   if (!id || !isValidObjectId(id)) {
     return res.status(400).send('Invalid or missing truck ID');
@@ -67,7 +67,7 @@ exports.getTruckById = async (req, res) => {
 };
 
 // PUT /api/trucks/:id
-exports.updateTruck = async (req, res) => {
+export const updateTruck = async (req, res) => {
   const id = req.params.id;
 
   if (!id || !isValidObjectId(id)) {
@@ -90,13 +90,13 @@ exports.updateTruck = async (req, res) => {
     if (!truck) return res.status(404).send("Truck not found");
     res.send(truck);
   } catch (err) {
-    console.error(err);
+    
     res.status(500).send("Server Error");
   }
 };
 
 // DELETE /api/trucks/:id
-exports.deleteTruck = async (req, res) => {
+export const deleteTruck = async (req, res) => {
   const id = req.params.id;
 
   if (!id || !isValidObjectId(id)) {
@@ -108,7 +108,7 @@ exports.deleteTruck = async (req, res) => {
     if (!truck) return res.status(404).send("Truck not found");
     res.send({ message: "Truck deleted successfully" });
   } catch (err) {
-    console.error(err);
+   
     res.status(500).send("Server Error");
   }
 };

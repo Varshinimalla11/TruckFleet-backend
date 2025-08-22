@@ -1,7 +1,7 @@
-const express = require("express");
+import express from "express"
 const router = express.Router();
-const driveSessionController = require("../controllers/driveSessionController");
-const auth = require("../middleware/auth");
+import * as driveSessionController from "../controllers/driveSessionController.js";
+import auth from "../middleware/auth.js";
 
 // // 📌 Create drive session manually (if allowed)
 // /**
@@ -94,4 +94,4 @@ router.put(
  */
 router.get("/trip/:tripId", auth, driveSessionController.getSessionsByTrip);
 
-module.exports = router;
+export default router;

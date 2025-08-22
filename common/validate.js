@@ -1,4 +1,4 @@
-const passwordComplexity = require("joi-password-complexity");
+import passwordComplexity from "joi-password-complexity";
 
 const complexityOptions = {
   min: 6,
@@ -10,4 +10,4 @@ const complexityOptions = {
   requirementCount: 4,
 };
 
-module.exports = passwordComplexity(complexityOptions);
+export default passwordComplexity(complexityOptions);

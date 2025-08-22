@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 function validateInviteToken(data) {
   const schema = Joi.object({
@@ -22,4 +22,4 @@ function validateInviteToken(data) {
   return schema.validate(data);
 }
 
-module.exports = validateInviteToken;
+export default validateInviteToken;

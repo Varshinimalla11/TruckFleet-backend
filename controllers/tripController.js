@@ -1,12 +1,12 @@
-const Trip = require("../models/trip");
-const { validateTrip } = require("../validationModels/validateTrip");
-const notifyUser = require("../utils/notifyUser");
-const User = require("../models/user");
-const DriveSession = require("../models/driveSession");
-const RestLog = require("../models/restLog");
+import Trip from "../models/trip.js";
+import {validateTrip} from "../validationModels/validateTrip.js";
+import notifyUser from "../utils/notifyUser.js";
+
+import DriveSession from "../models/driveSession.js";
+import RestLog from "../models/restLog.js";
 
 // POST /api/trips
-exports.createTrip = async (req, res) => {
+export const createTrip = async (req, res) => {
   const { error } = validateTrip(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -43,7 +43,7 @@ exports.createTrip = async (req, res) => {
 };
 
 // GET /api/trips
-exports.getAllTrips = async (req, res) => {
+export const getAllTrips = async (req, res) => {
   if (req.user.role === "driver") {
     return res.status(403).send("Drivers are not allowed to view all trips.");
   }
@@ -67,7 +67,7 @@ exports.getAllTrips = async (req, res) => {
 };
 
 // GET /api/trips/:id
-exports.getTripById = async (req, res) => {
+export const getTripById = async (req, res) => {
   const trip = await Trip.findOne({
     _id: req.params.id,
     isDeleted: false, // ✅ Only fetch non-deleted trips
@@ -89,7 +89,7 @@ exports.getTripById = async (req, res) => {
 };
 
 // PUT /api/trips/:id/start
-exports.startTrip = async (req, res) => {
+export const startTrip = async (req, res) => {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).send("Trip not found");
 
@@ -121,7 +121,7 @@ exports.startTrip = async (req, res) => {
   res.send({ message: "Trip started", trip, firstSession });
 };
 
-exports.completeTrip = async (req, res) => {
+export const completeTrip = async (req, res) => {
   try {
     const { fuel_left } = req.body;
     if (fuel_left === undefined || fuel_left === null) {
@@ -189,7 +189,7 @@ exports.completeTrip = async (req, res) => {
 };
 
 // PUT /api/trips/:id
-exports.updateTrip = async (req, res) => {
+export const updateTrip = async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).send("Trip not found");
@@ -232,7 +232,7 @@ exports.updateTrip = async (req, res) => {
 
 // DELETE /api/trips/:id
 // Soft delete: mark trip as deleted instead of removing it
-exports.deleteTrip = async (req, res) => {
+export const deleteTrip = async (req, res) => {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).send("Trip not found");
 
@@ -243,7 +243,7 @@ exports.deleteTrip = async (req, res) => {
 };
 
 // PUT /api/trips/:id/restore
-exports.restoreTrip = async (req, res) => {
+export const restoreTrip = async (req, res) => {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).send("Trip not found");
 
@@ -256,7 +256,7 @@ exports.restoreTrip = async (req, res) => {
 };
 
 // PUT /api/trips/:id/cancel
-exports.cancelTrip = async (req, res) => {
+export const cancelTrip = async (req, res) => {
   const trip = await Trip.findById(req.params.id);
   if (!trip) return res.status(404).send("Trip not found");
 
@@ -283,7 +283,7 @@ exports.cancelTrip = async (req, res) => {
 };
 
 // GET /api/trips/my-trips - driver-specific trips
-exports.getMyTrips = async (req, res) => {
+export const getMyTrips = async (req, res) => {
   if (req.user.role !== "driver") {
     return res.status(403).send("Only drivers can view their trips.");
   }

@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-const Joi = require("joi");
+import mongoose from "mongoose";
 
 const RefuelEventSchema = new mongoose.Schema({
   trip_id: {
@@ -30,4 +29,5 @@ const RefuelEventSchema = new mongoose.Schema({
 });
 
 const RefuelEvent = mongoose.model("RefuelEvent", RefuelEventSchema);
-module.exports = RefuelEvent;
+
+export default RefuelEvent;

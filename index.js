@@ -1,21 +1,29 @@
-const express = require("express");
-const winston = require("winston");
-const swaggerUi = require("swagger-ui-express");
-const swaggerJsdoc = require("swagger-jsdoc");
-const swaggerOptions = require("./swagger/swaggerOptions");
-const cors = require("cors");
-const { initSocket } = require("./utils/socketUtils");
-// const adminRouter = require("./admin");
+import express from "express";
+import winston from "winston";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerOptions from "./swagger/swaggerOptions.js";
+import cors from "cors";
+import connectDB from "./startup/db.js";
+import { initSocket } from "./utils/socketUtils.js";
+import adminRouter from "./admin.js";
+
 const app = express();
 
 app.use(cors());
 
-require("./startup/config")();
-require("./startup/validation")();
-require("./startup/db")();
-require("./cron/driveMonitoringJob");
-require("./startup/routes")(app);
-// app.use("/admin", adminRouter);
+import("./startup/config.js");
+import("./startup/validation.js");
+
+await connectDB();
+
+
+import("./cron/driveMonitoringJob.js");
+const startupRoutesModule = await import("./startup/routes.js");
+startupRoutesModule.default(app);
+
+app.use("/admin", adminRouter);
+
 const specs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
@@ -27,4 +35,4 @@ const server = app.listen(port, () => {
 
 initSocket(server);
 
-module.exports = server;
+export default server;

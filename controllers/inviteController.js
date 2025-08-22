@@ -1,13 +1,25 @@
-const crypto = require("crypto");
-const { InviteToken } = require("../models/inviteToken");
-const sendEmail = require("../utils/emailService");
+import crypto from "crypto";
+import { InviteToken } from "../models/inviteToken.js";
+import {sendEmail} from "../utils/emailService.js";
+import {User} from "../models/user.js";
 
-exports.sendInviteToken = async (req, res) => {
+export const sendInviteToken = async (req, res) => {
   try {
     const { email } = req.body;
 
     if (!email) return res.status(400).send("Driver email is required.");
 
+
+    
+    // Normalize email to lowercase
+    const normalizedEmail = email.toLowerCase();
+
+    // Check if user email already exists (any role)
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(400).send({ message: "Email is already registered" });
+    }
+    
     // generate secure token
     const token = crypto.randomBytes(10).toString("hex");
     const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
@@ -38,7 +50,7 @@ exports.sendInviteToken = async (req, res) => {
   }
 };
 
-exports.verifyInviteToken = async (req, res) => {
+export const verifyInviteToken = async (req, res) => {
   try {
     const { token } = req.body;
     if (!token) return res.status(400).send({ message: "Token is required" });

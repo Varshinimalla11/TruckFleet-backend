@@ -1,14 +1,15 @@
 // utils/socketUtils.js
-const config = require("config");
-const Notification = require("../models/notification");
-const winston = require("winston");
+import config from "config";
+import {Notification} from "../models/notification.js";
+import winston from "winston";
+import { Server } from "socket.io";
 
 let io;
 
 function initSocket(server) {
   const socketConfig = config.get("socket");
 
-  io = require("socket.io")(server, {
+  io = new Server(server, {
     path: socketConfig.path,
     cors: {
       origin: socketConfig.corsOrigin,
@@ -46,7 +47,7 @@ async function emitNotification(userId, notification) {
   winston.info(`Sent real-time notification to user ${userId}`);
 }
 
-module.exports = {
+export {
   initSocket,
   getIO,
   emitNotification,

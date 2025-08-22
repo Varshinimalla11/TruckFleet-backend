@@ -1,10 +1,10 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
 
-const auth = require("../middleware/auth");
-const ownerOnly = require("../middleware/ownerOrAdminOnly");
+import auth from "../middleware/auth.js";
+import ownerOnly from "../middleware/ownerOrAdminOnly.js";
 
-const inviteController = require("../controllers/inviteController");
+import * as inviteController from "../controllers/inviteController.js";
 
 /**
  * @swagger
@@ -84,4 +84,5 @@ router.post("/send", [auth, ownerOnly], inviteController.sendInviteToken);
  *         description: Server error
  */
 router.post("/verify", inviteController.verifyInviteToken);
-module.exports = router;
+
+export default router;

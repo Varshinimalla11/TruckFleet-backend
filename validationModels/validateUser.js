@@ -1,5 +1,6 @@
-const Joi = require("joi");
-const passwordComplexity = require("../common/validate");
+import Joi from "joi";
+
+import passwordComplexity from "../common/validate.js";
 
 function validateUser(user) {
   const schema = Joi.object({
@@ -59,5 +60,7 @@ function validateUser(user) {
 
   return schema.validate(user);
 }
-
-exports.validateUser = validateUser;
+// export default {
+//   validateUser
+// };
+export {validateUser};

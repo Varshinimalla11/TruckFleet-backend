@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
-const Joi = require("joi");
-const { objectId } = require("../common/validateObjectId");
+import Joi from "joi";
+import { objectId } from "../common/validateObjectId.js";
 
 function validateTruck(truck) {
   const schema = Joi.object({
@@ -26,4 +25,4 @@ function validateTruck(truck) {
   return schema.validate(truck);
 }
 
-exports.validateTruck = validateTruck;
+export {validateTruck};

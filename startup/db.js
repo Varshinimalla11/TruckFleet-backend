@@ -1,8 +1,8 @@
-const winston = require("winston");
-const mongoose = require("mongoose");
-const config = require("config");
+import winston from "winston";
+import mongoose from "mongoose";
+import config from "config";
 
-module.exports = function () {
+export default function () {
   const db = config.get("db");
   mongoose
     .connect(db)

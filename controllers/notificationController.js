@@ -1,7 +1,7 @@
-const { Notification } = require("../models/notification");
+import { Notification } from "../models/notification.js";
 
 // Get all notifications for logged-in user
-exports.getMyNotifications = async (req, res) => {
+export const getMyNotifications = async (req, res) => {
   try {
     const notifications = await Notification.find({
       user_id: req.user._id,
@@ -15,7 +15,7 @@ exports.getMyNotifications = async (req, res) => {
 };
 
 // Mark a notification as read
-exports.markAsSeen = async (req, res) => {
+export const markAsSeen = async (req, res) => {
   try {
     const notification = await Notification.findOneAndUpdate(
       {
@@ -37,7 +37,7 @@ exports.markAsSeen = async (req, res) => {
 };
 
 // Mark all notifications as seen
-exports.markAllAsSeen = async (req, res) => {
+export const markAllAsSeen = async (req, res) => {
   try {
     await Notification.updateMany(
       {
@@ -54,7 +54,7 @@ exports.markAllAsSeen = async (req, res) => {
 };
 
 // Delete a notification
-exports.deleteNotification = async (req, res) => {
+export const deleteNotification = async (req, res) => {
   try {
     const notification = await Notification.findOneAndDelete({
       _id: req.params.id,

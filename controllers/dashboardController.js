@@ -1,10 +1,10 @@
-const Trip = require("../models/trip");
-const DriveSession = require("../models/driveSession");
-const { Truck } = require("../models/truck");
-const { User } = require("../models/user");
+import Trip from "../models/trip.js";
+import DriveSession from "../models/driveSession.js";
+import { Truck } from "../models/truck.js";
+import { User } from "../models/user.js";
 
 // GET dashboard stats
-exports.getStats = async (req, res) => {
+export const getStats = async (req, res) => {
   try {
     let truckFilter = {};
     let tripFilter = { isDeleted: false };
@@ -15,6 +15,7 @@ exports.getStats = async (req, res) => {
       truckFilter.owner_id = req.user._id;
       tripFilter.owner_id = req.user._id;
       driverFilter.ownedBy = req.user._id; 
+
     } else if (req.user.role === "driver") {
       truckFilter = {}; // no trucks for drivers
       tripFilter = { ...tripFilter, driver_id: req.user._id };
@@ -41,7 +42,7 @@ exports.getStats = async (req, res) => {
 };
 
 // GET recent trips
-exports.getRecentTrips = async (req, res) => {
+export const getRecentTrips = async (req, res) => {
   const filter = { isDeleted: false };
 
   if (req.user.role === "owner") {
@@ -61,7 +62,7 @@ exports.getRecentTrips = async (req, res) => {
 
 
 // GET recent drive sessions
-exports.getRecentDriveSessions = async (req, res) => {
+export const getRecentDriveSessions = async (req, res) => {
   let tripFilter = {};
   if (req.user.role === "owner") {
     tripFilter.owner_id = req.user._id;
@@ -77,6 +78,7 @@ exports.getRecentDriveSessions = async (req, res) => {
       return DriveSession.find({ trip_id: { $in: tripIds } })
         .sort({ start_time: -1 })
         .limit(5)
+        .populate("trip_id")
         .then(sessions => res.json(sessions));
     })
     .catch(() => res.status(500).json({ message: "Internal Server Error" }));

@@ -1,27 +1,23 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const config = require("config");
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import config from "config";
+import { User } from "../models/user.js";
+import { OTP } from "../models/otp.js";
+import { InviteToken } from "../models/inviteToken.js";
+import { EmailVerification } from "../models/emailVerification.js";
+import {validateUser} from "../validationModels/validateUser.js";
+import { validateOTP } from "../validationModels/validateOtp.js";
+import validation from "../validationModels/validatePasswordReset.js";
 
-const { User } = require("../models/user");
-const { OTP } = require("../models/otp");
-const { InviteToken } = require("../models/inviteToken");
-const { EmailVerification } = require("../models/emailVerification");
-
-const { validateUser } = require("../validationModels/validateUser");
-const { validateOTP } = require("../validationModels/validateOtp");
-const {
-  validatePasswordReset,
-  validateEmail,
-} = require("../validationModels/validatePasswordReset");
-
-const {
+import {
   sendPasswordResetEmail,
   sendOTPEmail,
-} = require("../utils/emailService");
-const notifyUser = require("../utils/notifyUser");
+} from "../utils/emailService.js";
+import notifyUser from "../utils/notifyUser.js";
+import _ from "lodash";
 
-const _ = require("lodash");
+const { validateEmail, validatePasswordReset } = validation;
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -38,7 +34,7 @@ const generateVerificationToken = (email) => {
   );
 };
 
-exports.sendOTP = async (req, res) => {
+export const sendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -76,18 +72,18 @@ exports.sendOTP = async (req, res) => {
         otp: config.get("env") === "development" ? otpCode : undefined,
       });
     } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+     
       // Clean up OTP record if email fails
       await OTP.deleteOne({ email: email.toLowerCase(), otp: otpCode });
       res.status(500).send({ message: "Failed to send OTP email" });
     }
   } catch (error) {
-    console.error("Send OTP error:", error);
+    
     res.status(500).send({ message: "Server error" });
   }
 };
 
-exports.verifyOTP = async (req, res) => {
+export const verifyOTP = async (req, res) => {
   try {
     const { error } = validateOTP(req.body);
     if (error)
@@ -135,12 +131,12 @@ exports.verifyOTP = async (req, res) => {
       verified: true,
     });
   } catch (error) {
-    console.error("Verify OTP error:", error);
+   
     res.status(500).send({ message: "Server error" });
   }
 };
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   const { error } = validateUser(req.body);
   if (error) return res.status(400).send({ message: error.details[0].message });
 
@@ -185,7 +181,7 @@ exports.register = async (req, res) => {
   res.send({ token });
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -204,13 +200,13 @@ exports.login = async (req, res) => {
   res.send({ token, user: _.pick(user, ["_id", "name", "email", "role"]) });
 };
 
-exports.getCurrentUser = async (req, res) => {
+export const getCurrentUser = async (req, res) => {
   const user = await User.findById(req.user._id).select("-password");
   if (!user) return res.status(404).send("User not found.");
   res.send(user);
 };
 
-exports.registerDriver = async (req, res) => {
+export const registerDriver = async (req, res) => {
   try {
     const {
       token,
@@ -221,6 +217,7 @@ exports.registerDriver = async (req, res) => {
       aadhar_number,
       license_number,
     } = req.body;
+
 
     if (!token)
       return res.status(400).send({ message: "Invite token is required" });
@@ -270,11 +267,12 @@ exports.registerDriver = async (req, res) => {
       user: _.pick(user, ["_id", "name", "email", "role"]),
     });
   } catch (err) {
+
     res.status(500).send({ message: "Server error" });
   }
 };
 
-exports.getAllDrivers = async (req, res) => {
+export const getAllDrivers = async (req, res) => {
   try {
     // If the user is owner, fetch only their drivers
     if (req.user.role === "owner") {
@@ -298,9 +296,9 @@ exports.getAllDrivers = async (req, res) => {
   }
 };
 
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   try {
-    const { error } = validateEmail(req.body);
+  const { error } = validateEmail(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
@@ -338,7 +336,7 @@ exports.forgotPassword = async (req, res) => {
       //   }
       // );
     } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+    
       // Remove the token if email fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
@@ -353,14 +351,14 @@ exports.forgotPassword = async (req, res) => {
       message: "If the email exists, a password reset link has been sent",
     });
   } catch (error) {
-    console.error("Forgot password error:", error);
+    
     res.status(500).send({ message: "Server error" });
   }
 };
 
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
   try {
-    const { error } = validatePasswordReset(req.body);
+  const { error } = validatePasswordReset(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
@@ -401,12 +399,12 @@ exports.resetPassword = async (req, res) => {
       message: "Password reset successfully",
     });
   } catch (error) {
-    console.error("Reset password error:", error);
+  
     res.status(500).send({ message: "Server error" });
   }
 };
 
-exports.validateResetToken = async (req, res) => {
+export const validateResetToken = async (req, res) => {
   try {
     const { token } = req.params;
 
@@ -427,7 +425,7 @@ exports.validateResetToken = async (req, res) => {
       message: "Token is valid",
     });
   } catch (error) {
-    console.error("Validate token error:", error);
+   
     res.status(500).send({ message: "Server error" });
   }
 };

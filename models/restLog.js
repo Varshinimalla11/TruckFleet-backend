@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const RestLogSchema = new mongoose.Schema({
   trip_id: {
@@ -22,4 +22,5 @@ const RestLogSchema = new mongoose.Schema({
 });
 
 const RestLog = mongoose.model("RestLog", RestLogSchema);
-module.exports = RestLog;
+
+export default RestLog;

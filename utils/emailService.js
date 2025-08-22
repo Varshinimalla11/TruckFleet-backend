@@ -1,5 +1,5 @@
-const nodemailer = require("nodemailer");
-const config = require("config");
+import nodemailer from "nodemailer";
+import config from "config";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -68,4 +68,4 @@ async function sendOTPEmail(email, otp) {
   return await sendEmail(email, subject, text, html);
 }
 
-module.exports = { sendEmail, sendPasswordResetEmail, sendOTPEmail };
+export { sendEmail, sendPasswordResetEmail, sendOTPEmail };

@@ -1,5 +1,5 @@
-const Joi = require("joi");
-const { objectId } = require("../common/validateObjectId");
+import Joi from "joi";
+import { objectId } from "../common/validateObjectId.js";
 
 const validateNotification = (notification) => {
   const schema = Joi.object({
@@ -32,4 +32,5 @@ const validateNotification = (notification) => {
   return schema.validate(notification, { abortEarly: false });
 };
 
-exports.validateNotification = validateNotification;
+export { validateNotification };
+

@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 function validateOTP(data) {
   const schema = Joi.object({
@@ -16,4 +16,4 @@ function validateOTP(data) {
   return schema.validate(data);
 }
 
-exports.validateOTP = validateOTP;
+export {validateOTP};

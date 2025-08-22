@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const auth = require("../middleware/auth");
-const dashboardController = require("../controllers/dashboardController");
-const authorizeRole = require("../middleware/authorizeRole");
+import auth from "../middleware/auth.js";
+import * as dashboardController from "../controllers/dashboardController.js";
+import authorizeRole from "../middleware/authorizeRole.js";
 
 /**
  * @swagger
@@ -84,4 +84,4 @@ router.get(
   dashboardController.getRecentDriveSessions
 );
 
-module.exports = router;
+export default router;

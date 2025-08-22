@@ -1,11 +1,10 @@
-const DriveSession = require("../models/driveSession");
-const RestLog = require("../models/restLog");
-const Trip = require("../models/trip");
-const { Notification } = require("../models/notification");
-const { Truck } = require("../models/truck");
-// const { validateDriveSession } = require("../validations/driveSessionValidation"); // Uncomment if using Joi validation
-const RefuelEvent = require("../models/refuelEvent");
-const notifyUser = require("../utils/notifyUser");
+import DriveSession from "../models/driveSession.js";
+import RestLog from "../models/restLog.js";
+import Trip from "../models/trip.js";
+import { Notification } from "../models/notification.js";
+import { Truck } from "../models/truck.js";
+import RefuelEvent from "../models/refuelEvent.js";
+import notifyUser from "../utils/notifyUser.js";
 
 // Utility
 // function getHoursBetween(start, end) {
@@ -141,7 +140,7 @@ async function sendViolationNotification(userId, message) {
 //
 // End drive session and start rest
 //
-exports.endDriveSessionAndStartRest = async (req, res) => {
+export const endDriveSessionAndStartRest = async (req, res) => {
   try {
     const { session_id } = req.params;
     const { fuel_left } = req.body;
@@ -263,7 +262,7 @@ exports.endDriveSessionAndStartRest = async (req, res) => {
 //
 // 3️⃣ Get drive sessions by trip
 //
-exports.getSessionsByTrip = async (req, res) => {
+export const getSessionsByTrip = async (req, res) => {
   const { tripId } = req.params;
 
   const trip = await Trip.findById(tripId);
