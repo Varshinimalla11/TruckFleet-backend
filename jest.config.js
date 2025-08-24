@@ -1,8 +1,8 @@
 export default {
-  transform: {
-    "^.+\\.[jt]sx?$": "babel-jest", // lets Jest handle ES6/JSX
-  },
-
-  testEnvironment: "node", // use "jsdom" if you test React components
-  moduleFileExtensions: ["js", "jsx", "json"],
+  testEnvironment: 'node',
+  transform: {},
+  moduleFileExtensions: ['js', 'jsx', 'json', 'mjs'],
+  testMatch: ['**/tests/**/*.test.mjs'],
+  testTimeout: 10000,
+  verbose: true
 };
