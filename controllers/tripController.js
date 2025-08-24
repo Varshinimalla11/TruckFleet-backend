@@ -1,7 +1,8 @@
 import Trip from "../models/trip.js";
 import {validateTrip} from "../validationModels/validateTrip.js";
 import notifyUser from "../utils/notifyUser.js";
-
+import {Truck} from "../models/truck.js";
+import RefuelEvent from "../models/refuelEvent.js";
 import DriveSession from "../models/driveSession.js";
 import RestLog from "../models/restLog.js";
 
@@ -145,11 +146,75 @@ export const completeTrip = async (req, res) => {
       trip_id: trip._id,
       end_time: null, // ✅ changed for consistency
     });
+    // if (openDrive) {
+    //   openDrive.end_time = now;
+    //   openDrive.fuel_used = fuel_left;
+    //   console.log('About to save DriveSession:', openDrive);
+    //   await openDrive.save();
+    // }
     if (openDrive) {
-      openDrive.end_time = now;
-      openDrive.fuel_end = fuel_left;
-      await openDrive.save();
-    }
+  openDrive.end_time = now;
+
+  const truck = await Truck.findById(trip.truck_id);
+  const mileage = truck?.mileage_factor || 3;
+
+  let start_fuel = trip.fuel_start ?? 100;
+
+  const lastRestLog = await RestLog.findOne({
+    trip_id: trip._id,
+    rest_end_time: { $lte: openDrive.start_time },
+  }).sort({ rest_end_time: -1 });
+
+  if (lastRestLog && typeof lastRestLog.fuel_at_rest_end === "number") {
+    start_fuel = lastRestLog.fuel_at_rest_end;
+  }
+
+  const lastDrive = await DriveSession.findOne({
+    trip_id: trip._id,
+    end_time: { $lte: openDrive.start_time },
+  }).sort({ end_time: -1 });
+
+  if (lastDrive && typeof lastDrive.fuel_used === "number") {
+    // Use fuel_used from lastDrive to update start_fuel logically
+    // (optional tweak if needed, based on your logic)
+  }
+
+  const refuelsDuringDrive = await RefuelEvent.find({
+    trip_id: trip._id,
+    event_time: { $gte: openDrive.start_time, $lte: now },
+  });
+
+  const fuelAddedTotal = refuelsDuringDrive.reduce(
+    (sum, r) => sum + (r.fuel_added || 0),
+    0
+  );
+
+  start_fuel += fuelAddedTotal;
+
+  // Calculate fuel used and km covered
+  let fuel_used = start_fuel - fuel_left;
+  if (fuel_used < 0) fuel_used = 0;
+
+  let km_covered = fuel_used * mileage;
+  if (km_covered < 0) km_covered = 0;
+
+  // Cap km_covered so total doesn't exceed trip total_km
+  const totalKmBefore = await DriveSession.aggregate([
+    { $match: { trip_id: trip._id, _id: { $ne: openDrive._id } } },
+    { $group: { _id: null, total: { $sum: "$km_covered" } } },
+  ]);
+  const kmAlready = totalKmBefore.length ? totalKmBefore[0].total : 0;
+
+  if (kmAlready + km_covered > trip.total_km) {
+    km_covered = Math.max(trip.total_km - kmAlready, 0);
+  }
+
+  openDrive.fuel_used = Number(fuel_used.toFixed(2));
+  openDrive.km_covered = Number(km_covered.toFixed(2));
+
+  await openDrive.save();
+}
+
 
     // Close any open RestLog
     const openRest = await RestLog.findOne({
@@ -184,6 +249,7 @@ export const completeTrip = async (req, res) => {
       closedRestLog: openRest || null,
     });
   } catch (error) {
+     console.error("completeTrip error:", error);
     res.status(500).json({ message: error.message });
   }
 };
