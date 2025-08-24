@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "cross-env EMAIL_USER=malla.varshini03@gmail.com EMAIL_PASS=lqnndavmineqcvdq nodemon index.js",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
-
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch"
   },
   "author": "",
   "license": "ISC",
@@ -39,6 +40,9 @@
     "winston-mongodb": "^7.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/preset-env": "^7.28.3",
+    "babel-jest": "^30.0.5",
     "jest": "^30.0.5"
   }
 }

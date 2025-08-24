@@ -28,10 +28,7 @@ export const getStats = async (req, res) => {
     // Added for test expectation
     await DriveSession.countDocuments();
 
-    const ongoingTrips = await Trip.countDocuments({
-      ...tripFilter,
-      status: "ongoing",
-    });
+    const ongoingTrips = await Trip.countDocuments({ ...tripFilter, status: "ongoing" });
 
     res.json({
       totalTrucks,
@@ -59,9 +56,10 @@ export const getRecentTrips = async (req, res) => {
     .limit(5)
     .populate("truck_id")
     .populate("driver_id")
-    .then((trips) => res.json(trips))
+    .then(trips => res.json(trips))
     .catch(() => res.status(500).json({ message: "Internal Server Error" }));
 };
+
 
 // GET recent drive sessions
 export const getRecentDriveSessions = async (req, res) => {
@@ -74,8 +72,8 @@ export const getRecentDriveSessions = async (req, res) => {
 
   Trip.find(tripFilter)
     .select("_id")
-    .then((trips) => {
-      const tripIds = trips.map((trip) => trip._id);
+    .then(trips => {
+      const tripIds = trips.map(trip => trip._id);
       // Use chained mocks for DriveSession.find
       return DriveSession.find({ trip_id: { $in: tripIds } })
         .sort({ start_time: -1 })
@@ -85,3 +83,4 @@ export const getRecentDriveSessions = async (req, res) => {
     })
     .catch(() => res.status(500).json({ message: "Internal Server Error" }));
 };
+
