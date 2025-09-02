@@ -161,6 +161,7 @@ export const endDriveSessionAndStartRest = async (req, res) => {
     const truck = await Truck.findById(trip.truck_id);
 
     const mileage = truck.mileage_factor || 3;
+
     let start_fuel = trip.fuel_start ?? 100;
 
     const lastRestLog = await RestLog.findOne({
@@ -192,6 +193,17 @@ export const endDriveSessionAndStartRest = async (req, res) => {
     );
 
     start_fuel += fuelAddedTotal;
+
+    // Validation: fuel_left should not exceed available fuel
+    if (fuel_left > start_fuel) {
+      return res
+        .status(400)
+        .send(
+          `Invalid fuel_left: cannot be greater than total available fuel (${start_fuel.toFixed(
+            2
+          )})`
+        );
+    }
 
     let fuel_used = start_fuel - fuel_left;
     if (fuel_used < 0) fuel_used = 0;

@@ -10,8 +10,9 @@ function getMinutesBetween(start, end) {
   return (new Date(end) - new Date(start)) / (1000 * 60);
 }
 
-cron.schedule("*/1 * * * *", async () => { // runs every minute
-  
+cron.schedule("*/1 * * * *", async () => {
+  // runs every minute
+
   const ongoing = await DriveSession.find({ end_time: null });
 
   for (const session of ongoing) {
@@ -21,13 +22,15 @@ cron.schedule("*/1 * * * *", async () => { // runs every minute
 
     const driverId = trip.driver_id;
     const ownerId = trip.owner_id;
-
+    const driverName =
+      trip.driver_snapshot?.name || driverId?.toString() || "Unknown Driver";
     // --- 1. CONTINUOUS DRIVING VIOLATION ---
     const sessionMinutes = getMinutesBetween(session.start_time, now);
     if (sessionMinutes >= 3 && !session.warned_at_3min) {
-      const msg = "🚨 Continuous driving over 3 minutes without rest!";
-      await notifyUser(driverId, msg);
-      await notifyUser(ownerId, msg);
+      const msgDriver = `🚨 You have driven continuously over 3 minutes without rest!`;
+      const msgOwner = `🚨 Driver ${driverName} has driven continuously over 3 minutes without rest!`;
+      await notifyUser(driverId, msgDriver);
+      await notifyUser(ownerId, msgOwner);
       session.warned_at_3min = now;
       await session.save();
     }
@@ -53,9 +56,10 @@ cron.schedule("*/1 * * * *", async () => { // runs every minute
     }
     // Only trigger this warning ONCE, regardless of how many sessions today
     if (totalMinutes >= 5 && !warnedAlready) {
-      const msg = "🚨 Driving exceeded 5 minutes total today!";
-      await notifyUser(driverId, msg);
-      await notifyUser(ownerId, msg);
+      const msgDriver = `🚨 You have exceeded driving time by 5 minutes today!`;
+      const msgOwner = `🚨 Driver ${driverName} has exceeded driving time by 5 minutes today!`;
+      await notifyUser(driverId, msgDriver);
+      await notifyUser(ownerId, msgOwner);
 
       // Mark the warning on this ongoing session
       session.warned_at_5min = now;
@@ -65,9 +69,11 @@ cron.schedule("*/1 * * * *", async () => { // runs every minute
     // --- 3. CONTINUOUS 3-HOUR CHECK (as existing) ---
     const sessionHours = getHoursBetween(session.start_time, now);
     if (sessionHours >= 3 && !session.warned_at_3hr) {
-      const msg = "⚠️ Continuous driving over 3 hours. Take a rest!";
-      await notifyUser(driverId, msg);
-      await notifyUser(ownerId, msg);
+      const msgDriver =
+        "⚠️ You have driven continuously over 3 hours. Take a rest!";
+      const msgOwner = `⚠️ Driver ${driverName} has driven continuously over 3 hours. Take a rest!`;
+      await notifyUser(driverId, msgDriver);
+      await notifyUser(ownerId, msgOwner);
       session.warned_at_3hr = now;
       await session.save();
     }
@@ -81,14 +87,12 @@ cron.schedule("*/1 * * * *", async () => { // runs every minute
       if (s.warned_at_8hr) hour8Warned = true;
     }
     if (totalHoursToday >= 8 && !hour8Warned) {
-      const msg = "🚨 Daily driving exceeded 8 hours!";
-      await notifyUser(driverId, msg);
-      await notifyUser(ownerId, msg);
+      const msgDriver = `🚨 You (Driver ${driverName}) have exceeded daily driving limit of 8 hours!`;
+      const msgOwner = `🚨 Driver ${driverName} has exceeded daily driving limit of 8 hours!`;
+      await notifyUser(driverId, msgDriver);
+      await notifyUser(ownerId, msgOwner);
       session.warned_at_8hr = now;
       await session.save();
     }
   }
-  
 });
-
-
