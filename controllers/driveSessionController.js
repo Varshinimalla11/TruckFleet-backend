@@ -196,13 +196,9 @@ export const endDriveSessionAndStartRest = async (req, res) => {
 
     // Validation: fuel_left should not exceed available fuel
     if (fuel_left > start_fuel) {
-      return res
-        .status(400)
-        .send(
-          `Invalid fuel_left: cannot be greater than total available fuel (${start_fuel.toFixed(
-            2
-          )})`
-        );
+      return res.status(400).json({
+  message: "Invalid fuel_left: cannot be greater than total available fuel"
+});
     }
 
     let fuel_used = start_fuel - fuel_left;
