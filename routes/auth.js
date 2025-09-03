@@ -1,6 +1,7 @@
 import express from "express";
 import * as authController from "../controllers/authController.js";
 import auth from "../middleware/auth.js";
+import authorizeRole from "../middleware/authorizeRole.js";
 
 const router = express.Router();
 
@@ -368,5 +369,117 @@ router.post("/reset-password", authController.resetPassword);
  *         description: Server error
  */
 router.get("/validate-reset-token/:token", authController.validateResetToken);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   put:
+ *     summary: Update user profile
+ *     description: Allows a logged-in user to update their profile information.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               phone:
+ *                 type: string
+ *                 example: "+1234567890"
+ *               aadhar_number:
+ *                 type: string
+ *                 example: "1234-5678-9012"
+ *               license_number:
+ *                 type: string
+ *                 example: "DL-1234567890"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Profile updated successfully"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "64b6f29d8f4a3a001fbd1234"
+ *                     name:
+ *                       type: string
+ *                       example: John Doe
+ *                     email:
+ *                       type: string
+ *                       example: user@example.com
+ *                     phone:
+ *                       type: string
+ *                       example: "+1234567890"
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.put("/profile", auth, authController.updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/owners:
+ *   get:
+ *     summary: Get list of all owners
+ *     description: |
+ *       - **Admin only**: Returns all users with the `owner` role.
+ *       - Other roles (owner, driver) are denied access.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of owners retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     example: "64b6f29d8f4a3a001fbd1234"
+ *                   name:
+ *                     type: string
+ *                     example: "Alice Owner"
+ *                   email:
+ *                     type: string
+ *                     example: "owner@example.com"
+ *                   phone:
+ *                     type: string
+ *                     example: "+1234567890"
+ *                   role:
+ *                     type: string
+ *                     example: "owner"
+ *       403:
+ *         description: Access denied (if not admin)
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.get(
+  "/owners",
+  [auth, authorizeRole("admin")],
+  authController.adminOwners
+);
 
 export default router;

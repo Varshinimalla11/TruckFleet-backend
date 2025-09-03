@@ -6,14 +6,11 @@ import { User } from "../models/user.js";
 import { OTP } from "../models/otp.js";
 import { InviteToken } from "../models/inviteToken.js";
 import { EmailVerification } from "../models/emailVerification.js";
-import {validateUser} from "../validationModels/validateUser.js";
+import { validateUser } from "../validationModels/validateUser.js";
 import { validateOTP } from "../validationModels/validateOtp.js";
 import validation from "../validationModels/validatePasswordReset.js";
 
-import {
-  sendPasswordResetEmail,
-  sendOTPEmail,
-} from "../utils/emailService.js";
+import { sendPasswordResetEmail, sendOTPEmail } from "../utils/emailService.js";
 import notifyUser from "../utils/notifyUser.js";
 import _ from "lodash";
 
@@ -72,13 +69,11 @@ export const sendOTP = async (req, res) => {
         otp: config.get("env") === "development" ? otpCode : undefined,
       });
     } catch (emailError) {
-     
       // Clean up OTP record if email fails
       await OTP.deleteOne({ email: email.toLowerCase(), otp: otpCode });
       res.status(500).send({ message: "Failed to send OTP email" });
     }
   } catch (error) {
-    
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -131,7 +126,6 @@ export const verifyOTP = async (req, res) => {
       verified: true,
     });
   } catch (error) {
-   
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -201,7 +195,9 @@ export const login = async (req, res) => {
 };
 
 export const getCurrentUser = async (req, res) => {
-  const user = await User.findById(req.user._id).select("-password");
+  const user = await User.findById(req.user._id)
+    .select("-password")
+    .populate("ownedBy", "name");
   if (!user) return res.status(404).send("User not found.");
   res.send(user);
 };
@@ -217,7 +213,6 @@ export const registerDriver = async (req, res) => {
       aadhar_number,
       license_number,
     } = req.body;
-
 
     if (!token)
       return res.status(400).send({ message: "Invite token is required" });
@@ -267,7 +262,6 @@ export const registerDriver = async (req, res) => {
       user: _.pick(user, ["_id", "name", "email", "role"]),
     });
   } catch (err) {
-
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -298,7 +292,7 @@ export const getAllDrivers = async (req, res) => {
 
 export const forgotPassword = async (req, res) => {
   try {
-  const { error } = validateEmail(req.body);
+    const { error } = validateEmail(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
@@ -336,7 +330,6 @@ export const forgotPassword = async (req, res) => {
       //   }
       // );
     } catch (emailError) {
-    
       // Remove the token if email fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
@@ -351,14 +344,13 @@ export const forgotPassword = async (req, res) => {
       message: "If the email exists, a password reset link has been sent",
     });
   } catch (error) {
-    
     res.status(500).send({ message: "Server error" });
   }
 };
 
 export const resetPassword = async (req, res) => {
   try {
-  const { error } = validatePasswordReset(req.body);
+    const { error } = validatePasswordReset(req.body);
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
@@ -399,7 +391,6 @@ export const resetPassword = async (req, res) => {
       message: "Password reset successfully",
     });
   } catch (error) {
-  
     res.status(500).send({ message: "Server error" });
   }
 };
@@ -425,7 +416,62 @@ export const validateResetToken = async (req, res) => {
       message: "Token is valid",
     });
   } catch (error) {
-   
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const updateData = { ...req.body };
+
+    // Prevent updates to email and role
+    delete updateData.email;
+    delete updateData.role;
+    delete updateData.ownedBy;
+    // Fetch current user to check role (optional, if you want role-specific validation)
+    const currentUser = await User.findById(userId);
+    if (!currentUser) return res.status(404).send("User not found.");
+
+    // If driver, ensure required driver fields are included or validate specifically as needed
+    if (currentUser.role === "driver") {
+      // example: validate required fields present
+      if (!updateData.aadhar_number || !updateData.license_number) {
+        return res.status(400).send({
+          message: "Aadhar and license numbers are required for drivers.",
+        });
+      }
+    }
+
+    // Update user document
+    await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+      context: "query",
+    });
+
+    // Fetch updated user with owner name populated
+    let updatedUserQuery = User.findById(userId).select("-password");
+    if (currentUser.role === "driver") {
+      updatedUserQuery = updatedUserQuery.populate("ownedBy", "name");
+    }
+    const updatedUser = await updatedUserQuery;
+
+    if (!updatedUser) return res.status(404).send("User not found.");
+
+    res.send(updatedUser);
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.status(500).send({ message: "Server error" });
+  }
+};
+
+export const adminOwners = async (req, res) => {
+  try {
+    const owners = await User.find({ role: "owner" }).select("-password");
+    res.send(owners);
+  } catch (error) {
+    console.error("Error fetching owners:", error);
     res.status(500).send({ message: "Server error" });
   }
 };
