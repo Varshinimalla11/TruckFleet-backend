@@ -29,6 +29,13 @@ function validateUser(user) {
     //   "any.only": "Role must be one of 'admin', 'owner', or 'driver'",
     //   "any.required": "Role is required",
     // }),
+    role: Joi.string()
+  .valid("admin", "owner", "driver")
+  .optional()
+  .messages({
+    "any.only": "Role must be one of 'admin', 'owner', or 'driver'",
+}),
+
     ownedBy: Joi.when("role", {
       is: "driver",
       then: Joi.objectId().required().messages({

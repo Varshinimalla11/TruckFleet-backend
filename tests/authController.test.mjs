@@ -133,7 +133,7 @@ let validateUser, validateOTP, validateEmail, validatePasswordReset;
 let sendOTPEmail, sendPasswordResetEmail, notifyUser;
 
 // Import controller functions
-let sendOTP, verifyOTP, register, login, getCurrentUser, registerDriver, getAllDrivers, forgotPassword, resetPassword, validateResetToken;
+let sendOTP, verifyOTP, register, login, getCurrentUser, registerDriver, getAllDrivers, forgotPassword, resetPassword, validateResetToken, updateProfile, adminOwners;
 
 beforeAll(async () => {
   // Import mocked modules
@@ -184,6 +184,8 @@ beforeAll(async () => {
   forgotPassword = controllerModule.forgotPassword;
   resetPassword = controllerModule.resetPassword;
   validateResetToken = controllerModule.validateResetToken;
+  updateProfile = controllerModule.updateProfile;
+  adminOwners = controllerModule.adminOwners;
 });
 
 // Mock response and request objects
@@ -541,13 +543,13 @@ describe('Auth Controller', () => {
     it('should return 404 if user not found', async () => {
       const req = createMockReq({ user: { _id: 'user123' } });
       const res = createMockRes();
-      
+      // Mock the full chain: select().populate()
       User.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(null)
+        select: jest.fn().mockReturnValue({
+          populate: jest.fn().mockResolvedValue(null)
+        })
       });
-      
       await getCurrentUser(req, res);
-      
       expect(User.findById).toHaveBeenCalledWith('user123');
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.send).toHaveBeenCalledWith('User not found.');
@@ -556,19 +558,18 @@ describe('Auth Controller', () => {
     it('should return user if found', async () => {
       const req = createMockReq({ user: { _id: 'user123' } });
       const res = createMockRes();
-      
       const mockUser = {
         _id: 'user123',
         name: 'John Doe',
         email: 'test@example.com'
       };
-      
+      // Mock the full chain: select().populate()
       User.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockUser)
+        select: jest.fn().mockReturnValue({
+          populate: jest.fn().mockResolvedValue(mockUser)
+        })
       });
-      
       await getCurrentUser(req, res);
-      
       expect(User.findById).toHaveBeenCalledWith('user123');
       expect(res.send).toHaveBeenCalledWith(mockUser);
     });
@@ -897,5 +898,72 @@ describe('Auth Controller', () => {
       });
     });
   });
+
+  describe('updateProfile', () => {
+    it('should update profile for owner', async () => {
+      const req = createMockReq({
+        user: { _id: 'user123', role: 'owner' },
+        body: { name: 'Updated Owner', phone: '9999999999' }
+      });
+      const res = createMockRes();
+      const mockUser = { _id: 'user123', role: 'owner', name: 'Owner', phone: '8888888888' };
+      // Only mock the chain for select().populate()
+      User.findById.mockReturnValue({
+        select: jest.fn().mockReturnValue({
+          populate: jest.fn().mockResolvedValue(mockUser)
+        })
+      });
+      User.findByIdAndUpdate = jest.fn().mockResolvedValue(mockUser);
+      await updateProfile(req, res);
+      expect(User.findByIdAndUpdate).toHaveBeenCalledWith('user123', expect.objectContaining({ name: 'Updated Owner', phone: '9999999999' }), expect.any(Object));
+     
+    });
+
+    it('should return 404 if user not found', async () => {
+      const req = createMockReq({ user: { _id: 'user404', role: 'owner' }, body: { name: 'Test' } });
+      const res = createMockRes();
+      User.findById.mockResolvedValue(null);
+      await updateProfile(req, res);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.send).toHaveBeenCalledWith('User not found.');
+    });
+
+    it('should validate driver fields', async () => {
+      const req = createMockReq({
+        user: { _id: 'driver123', role: 'driver' },
+        body: { name: 'Driver' }
+      });
+      const res = createMockRes();
+      const mockUser = { _id: 'driver123', role: 'driver', name: 'Driver' };
+      User.findById.mockResolvedValue(mockUser);
+      await updateProfile(req, res);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Aadhar and license numbers are required for drivers.' });
+    });
+
+  });
+
+  describe('adminOwners', () => {
+    it('should return all owners', async () => {
+      const req = createMockReq({ user: { _id: 'admin123', role: 'admin' } });
+      const res = createMockRes();
+      const mockOwners = [
+        { _id: 'owner1', name: 'Owner 1', email: 'owner1@example.com' },
+        { _id: 'owner2', name: 'Owner 2', email: 'owner2@example.com' }
+      ];
+      User.find.mockReturnValue({ select: jest.fn().mockResolvedValue(mockOwners) });
+      await adminOwners(req, res);
+      expect(User.find).toHaveBeenCalledWith({ role: 'owner' });
+      expect(res.send).toHaveBeenCalledWith(mockOwners);
+    });
+
+    it('should handle server error', async () => {
+      const req = createMockReq({ user: { _id: 'admin123', role: 'admin' } });
+      const res = createMockRes();
+      User.find.mockReturnValue({ select: jest.fn().mockRejectedValue(new Error('Database error')) });
+      await adminOwners(req, res);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.send).toHaveBeenCalledWith({ message: 'Server error' });
+    });
+  });
 });
-   

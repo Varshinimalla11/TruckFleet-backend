@@ -160,10 +160,18 @@ export const register = async (req, res) => {
     });
   }
 
-  const allowedFields = ["name", "email", "phone", "password"];
+  const allowedFields = ["name", "email", "phone", "password","role"];
 
   const filteredData = _.pick(req.body, allowedFields);
-  filteredData.role = "owner";
+
+   if (!filteredData.role) {
+    filteredData.role = "owner";
+  } else if (filteredData.role === "admin") {
+    // role remains admin
+  } else {
+    filteredData.role = "owner"; // fallback to owner for any other value
+  }
+
   filteredData.emailVerified = true;
 
   user = new User(filteredData);
