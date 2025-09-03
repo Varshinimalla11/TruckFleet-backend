@@ -1,7 +1,8 @@
 // utils/socketUtils.js
 import config from "config";
-import {Notification} from "../models/notification.js";
+import { Notification } from "../models/notification.js";
 import winston from "winston";
+import logger from "../startup/logging.js";
 import { Server } from "socket.io";
 
 let io;
@@ -19,15 +20,15 @@ function initSocket(server) {
   });
 
   io.on("connection", (socket) => {
-    winston.info(`New client connected: ${socket.id}`);
+    logger.info(`New client connected: ${socket.id}`);
 
     socket.on("join-user-room", (userId) => {
       socket.join(`user-${userId}`);
-      winston.info(`User ${userId} joined their notification room`);
+      logger.info(`User ${userId} joined their notification room`);
     });
 
     socket.on("disconnect", () => {
-      winston.info(`Client disconnected: ${socket.id}`);
+      logger.info(`Client disconnected: ${socket.id}`);
     });
   });
 
@@ -44,11 +45,7 @@ function getIO() {
 async function emitNotification(userId, notification) {
   const io = getIO();
   io.to(`user-${userId}`).emit("new-notification", notification);
-  winston.info(`Sent real-time notification to user ${userId}`);
+  logger.info(`Sent real-time notification to user ${userId}`);
 }
 
-export {
-  initSocket,
-  getIO,
-  emitNotification,
-};
+export { initSocket, getIO, emitNotification };

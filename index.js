@@ -1,3 +1,5 @@
+import checkConfig from "./startup/config.js";
+checkConfig();
 import express from "express";
 import winston from "winston";
 import swaggerUi from "swagger-ui-express";
@@ -7,16 +9,15 @@ import cors from "cors";
 import connectDB from "./startup/db.js";
 import { initSocket } from "./utils/socketUtils.js";
 import adminRouter from "./admin.js";
+import logger from "./startup/logging.js";
 
 const app = express();
 
 app.use(cors());
 
-import("./startup/config.js");
 import("./startup/validation.js");
 
 await connectDB();
-
 
 import("./cron/driveMonitoringJob.js");
 const startupRoutesModule = await import("./startup/routes.js");
@@ -30,7 +31,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 const port = process.env.PORT || 4000;
 
 const server = app.listen(port, () => {
-  winston.info(`Server is running on port ${port}`);
+  logger.info(`Server is running on port ${port}`);
 });
 
 initSocket(server);

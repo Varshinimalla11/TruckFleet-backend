@@ -1,6 +1,7 @@
 import { Notification } from "../models/notification.js";
 import { emitNotification } from "./socketUtils.js";
 import winston from "winston";
+import logger from "../startup/logging.js";
 
 async function notifyUser(userId, message, options = {}) {
   const { type = "info", title, persist = true, realTime = true } = options;
@@ -17,7 +18,7 @@ async function notifyUser(userId, message, options = {}) {
 
   if (persist) {
     notification = await Notification.create(notificationData);
-    winston.info(
+    logger.info(
       `Persisted notification for user ${userId} with message: ${message}`
     );
   }
@@ -25,16 +26,16 @@ async function notifyUser(userId, message, options = {}) {
   if (realTime) {
     try {
       await emitNotification(userId, notification || notificationData);
-      winston.info(
+      logger.info(
         `Sent real-time notification to user ${userId} with message: ${message}`
       );
     } catch (err) {
-      winston.error(`WebSocket notification failed for user ${userId}:`, err);
+      logger.error(`WebSocket notification failed for user ${userId}:`, err);
     }
 
     return notification;
   } else if (err) {
-    winston.error(`Failed to create notification for user ${userId}:`, err);
+    logger.error(`Failed to create notification for user ${userId}:`, err);
     throw err;
   }
 }
